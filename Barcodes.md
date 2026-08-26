@@ -3,7 +3,7 @@ title: Barcodes
 aliases:
   - DaaS Barcodes
 type: project
-status: planning
+status: active
 phase: 1
 created: 2026-08-25
 updated: 2026-08-25
@@ -20,6 +20,8 @@ tags:
 ## Նախագծի նկարագիր
 
 **Barcodes**-ը Data as a Service համակարգ է, որը տարբեր աղբյուրներից ընդունում է ապրանքային տվյալներ, պահպանում դրանց սկզբնական տարբերակներն ու պատմությունը, AI-ի միջոցով ձևավորում է միասնական կանոնական ապրանք և այն տրամադրում հաճախորդների 1C բազաներին արագ API-ով։
+
+**Ընթացիկ վիճակ․** W1 foundation-ը պատրաստ է՝ երկու FastAPI app, shared packages, անկախ migrations, Docker Compose, tests և CI։ Հաջորդ քայլը W2 Server 1 ingest vertical slice-ն է։
 
 Առաջին փուլի տեխնիկական աղբյուրը՝ [[Barcodes/DaaS_Barcodes_Phase1_Technical_Spec_AM.docx|DaaS Barcodes Phase 1 տեխնիկական պահանջ]]։
 

@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=80,<82"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "daas-barcodes"
+version = "0.1.0"
+description = "AI-powered product data ingestion and delivery platform"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "alembic==1.19.1",
+    "asyncpg==0.31.0",
+    "celery==5.6.3",
+    "fastapi==0.141.1",
+    "httpx==0.28.1",
+    "prometheus-client==0.26.0",
+    "pydantic==2.13.4",
+    "pydantic-settings==2.15.0",
+    "redis==6.4.0",
+    "sqlalchemy[asyncio]==2.0.52",
+    "uvicorn[standard]==0.52.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy==1.20.2",
+    "pytest==8.4.2",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.16.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["apps*", "packages*"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["integration: requires external infrastructure"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+packages = ["apps", "packages"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["celery", "celery.*"]
+ignore_missing_imports = true
