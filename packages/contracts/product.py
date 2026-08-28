@@ -6,6 +6,7 @@ from typing import Annotated, Literal
 from pydantic import AnyHttpUrl, Field, StringConstraints, field_validator
 
 from packages.contracts.common import StrictContract
+from packages.domain.ingest import normalize_barcode
 
 Barcode = Annotated[str, StringConstraints(pattern=r"^[0-9]{8,14}$")]
 AtgCode = Annotated[str, StringConstraints(pattern=r"^[0-9]{4}$")]
@@ -24,6 +25,14 @@ class PublicProduct(StrictContract):
     version: int = Field(ge=1)
     quality_status: Literal["ai_processed", "source_complete", "processing_failed", "disabled"]
     updated_at: datetime
+
+    @field_validator("barcode")
+    @classmethod
+    def validate_barcode_checksum(cls, value: str) -> str:
+        """Reject structurally valid GTINs whose check digit is incorrect."""
+
+        normalize_barcode(value)
+        return value
 
     @field_validator("vat", "is_weighted", mode="before")
     @classmethod

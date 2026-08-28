@@ -10,7 +10,7 @@ from packages.contracts.product import PublicProduct
 
 def product_payload() -> dict[str, object]:
     return {
-        "barcode": "04850000000005",
+        "barcode": "04850000000007",
         "name": "Թթվասեր 20% 800 գ",
         "image_url": None,
         "atg_code": "0403",
@@ -26,7 +26,7 @@ def product_payload() -> dict[str, object]:
 def test_product_preserves_leading_zero_in_barcode() -> None:
     product = PublicProduct.model_validate(product_payload())
 
-    assert product.barcode == "04850000000005"
+    assert product.barcode == "04850000000007"
 
 
 @pytest.mark.parametrize("field", ["vat", "is_weighted"])
