@@ -3,10 +3,11 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Header, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, Request, status
 
 from apps.ingest_api.auth import BatchReader, IngestWriter
 from apps.ingest_api.dependencies import DatabaseSession
+from apps.ingest_api.queue import enqueue_import_batch
 from apps.ingest_api.services import (
     BatchNotFoundError,
     IdempotencyConflictError,
@@ -28,6 +29,7 @@ async def create_batch(
     idempotency_key: IdempotencyKey,
     principal: IngestWriter,
     session: DatabaseSession,
+    request: Request,
 ) -> BatchAcceptedResponse:
     try:
         accepted = await accept_batch(
@@ -45,6 +47,9 @@ async def create_batch(
                 "retryable": False,
             },
         ) from error
+
+    if request.app.state.enqueue_batches:
+        enqueue_import_batch(accepted.batch.id)
 
     return BatchAcceptedResponse(
         batch_id=accepted.batch.id,

@@ -65,3 +65,15 @@ def test_contract_requires_timezone() -> None:
 
     with pytest.raises(ValidationError, match="timezone"):
         IngestBatchRequest.model_validate(payload)
+
+
+def test_contract_rejects_duplicate_source_record_ids() -> None:
+    payload = valid_payload()
+    items = payload["items"]
+    assert isinstance(items, list)
+    first = items[0]
+    assert isinstance(first, dict)
+    items.append(dict(first))
+
+    with pytest.raises(ValidationError, match="unique"):
+        IngestBatchRequest.model_validate(payload)

@@ -67,6 +67,7 @@ def create_app(
     app.add_middleware(IngestBodyMiddleware)
     app.state.engine = engine
     app.state.session_factory = session_factory
+    app.state.enqueue_batches = active_settings.environment != "test"
     app.include_router(batches_router)
 
     @app.get("/health/live", response_model=HealthResponse, tags=["health"])

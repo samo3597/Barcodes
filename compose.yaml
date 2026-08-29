@@ -130,8 +130,11 @@ services:
     environment:
       ENVIRONMENT: development
       LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@postgres_server1:5432/barcodes_server1
       CELERY_BROKER_URL: redis://redis_server1:6379/0
       CELERY_RESULT_BACKEND: redis://redis_server1:6379/1
+      AI_PROVIDER: deterministic
+      AI_PROMPT_VERSION: product-v1
     volumes:
       - ./apps:/app/apps
       - ./packages:/app/packages
@@ -144,4 +147,3 @@ services:
 volumes:
   postgres_server1_data:
   postgres_server2_data:
-

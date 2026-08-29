@@ -54,13 +54,14 @@ docker compose up --build
 
 ## Կարգավիճակ
 
-W1 foundation-ը պատրաստ է։ W2-ում արդեն ավելացված է Server 1 ingest vertical slice-ը՝ source API key authentication, idempotent batch ընդունում, immutable raw revisions, batch status և validation սահմանափակումներ։ Հաջորդ փաթեթը W3 normalization/AI processing pipeline-ն է։
+W1 foundation-ը, W2 ingest-ը և W3 normalization/AI pipeline-ը պատրաստ են։ Համակարգն այժմ ունի deterministic candidate merge, durable Celery jobs, provider-neutral adapter, immutable AI results, schema repair և versioned reprocess։ Հաջորդ փաթեթը W4 canonical product/version/outbox և image storage-ն է։
 
 ## Փաստաթղթեր
 
 - [Նախագծի նկարագիր](Barcodes.md)
 - [Փաստաթղթերի ինդեքս](docs/README.md)
 - [Ճարտարապետություն](docs/architecture/README.md)
+- [W3 AI pipeline](docs/architecture/w3-ai-pipeline.md)
 - [Տեխնիկական որոշումներ](docs/decisions/README.md)
 - [API contracts](docs/api/README.md)
 - [Source ingest API v1](docs/api/ingest-v1.md)

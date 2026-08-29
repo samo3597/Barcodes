@@ -82,6 +82,20 @@ docker compose run --rm ingest_api pytest
 
 GitHub Actions-ը նույն ստուգումները կատարում է յուրաքանչյուր pull request-ի ժամանակ։ Եթե դրանցից մեկը ձախողվում է, փոփոխությունը դեռ պատրաստ չէ `main` branch մտնելու համար։
 
+## W3 worker և AI processing
+
+Ingest API-ն batch-ը նախ պահում է PostgreSQL-ում և միայն հետո ուղարկում Celery հերթ։ Worker-ը source revision-ներից deterministic candidate է կազմում, local development adapter-ով structured result ստանում և raw/parsed պատասխանները պահում առանձին։ Այս կառուցվածքի մանրամասն բացատրությունը՝ [W3 AI pipeline](architecture/w3-ai-pipeline.md)։
+
+Local `deterministic` adapter-ը վճարովի AI call չի անում և production-ում արգելված է։ Այն պետք է pipeline-ը, retry-ն ու database constraints-ը սովորելու/ստուգելու համար։
+
+Նոր prompt version-ով failed item-երը կրկին մշակելու օրինակ՝
+
+```powershell
+docker compose run --rm worker python scripts/reprocess.py `
+  --failed-only `
+  --prompt-version product-v2
+```
+
 ## Health endpoint-ների տարբերությունը
 
 - `/health/live` պատասխանում է՝ պրոցեսն աշխատո՞ւմ է։

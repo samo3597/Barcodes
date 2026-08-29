@@ -16,6 +16,7 @@ from packages.domain.api_keys import generate_source_api_key
 from packages.persistence.database import build_engine, build_session_factory
 from packages.persistence.server1.models import (
     ImportBatch,
+    ImportBatchItem,
     Source,
     SourceApiKey,
     SourceProductRevision,
@@ -183,6 +184,13 @@ async def test_authenticated_batch_is_idempotent_and_queryable() -> None:
     finally:
         await app.state.engine.dispose()
         async with session_factory() as session:
+            await session.execute(
+                delete(ImportBatchItem).where(
+                    ImportBatchItem.batch_id.in_(
+                        select(ImportBatch.id).where(ImportBatch.source_id == source_id)
+                    )
+                )
+            )
             await session.execute(
                 delete(SourceProductRevision).where(SourceProductRevision.source_id == source_id)
             )
