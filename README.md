@@ -54,7 +54,7 @@ docker compose up --build
 
 ## Կարգավիճակ
 
-W1–W5 աշխատանքային փաթեթները պատրաստ են։ Համակարգն այժմ ունի idempotent ingest, durable AI pipeline, immutable canonical versions, reliable Server 1 → Server 2 publication, tenant authentication և Redis-backed public product API։ Հաջորդ փաթեթը W6 quota, usage, feedback և changes API-ն է։
+W1–W6 աշխատանքային փաթեթները պատրաստ են։ Համակարգն այժմ ունի idempotent ingest, durable AI pipeline, immutable canonical versions, reliable Server 1 → Server 2 publication, tenant authentication, Redis-backed public product API և race-safe quota/usage accounting։ Հաջորդ փաթեթը W7 append-only feedback և cursor-based changes API-ն է։
 
 ## Փաստաթղթեր
 
@@ -64,6 +64,7 @@ W1–W5 աշխատանքային փաթեթները պատրաստ են։ Համ
 - [W3 AI pipeline](docs/architecture/w3-ai-pipeline.md)
 - [W4 canonical publication](docs/architecture/w4-canonical-publication.md)
 - [W5 Server 2 read model](docs/architecture/w5-server2-read-model.md)
+- [W6 quota և usage](docs/architecture/w6-quota-usage.md)
 - [Տեխնիկական որոշումներ](docs/decisions/README.md)
 - [API contracts](docs/api/README.md)
 - [Source ingest API v1](docs/api/ingest-v1.md)

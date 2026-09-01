@@ -1,6 +1,6 @@
 """SQLAlchemy models owned exclusively by Server 2."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
@@ -9,6 +9,7 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Identity,
@@ -131,7 +132,7 @@ class AppliedEvent(Server2Base):
 
 
 class ChangeEvent(Server2Base):
-    """Immutable cursor source; the public changes endpoint arrives in W6."""
+    """Immutable cursor source; the public changes endpoint arrives in W7."""
 
     __tablename__ = "change_events"
     __table_args__ = (
@@ -147,3 +148,53 @@ class ChangeEvent(Server2Base):
     barcode: Mapped[str] = mapped_column(String(14), index=True, nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False)
     changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class MonthlyProductUsage(Server2Base):
+    """Authoritative fact that a tenant received a barcode in a billing month."""
+
+    __tablename__ = "monthly_product_usage"
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id",
+            "billing_month",
+            "barcode",
+            name="uq_monthly_product_usage_tenant_month_barcode",
+        ),
+        Index("ix_monthly_product_usage_tenant_month", "tenant_id", "billing_month"),
+    )
+
+    id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), primary_key=True, default=new_uuid7
+    )
+    tenant_id: Mapped[UUID] = mapped_column(
+        ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
+    )
+    billing_month: Mapped[date] = mapped_column(Date, nullable=False)
+    barcode: Mapped[str] = mapped_column(String(14), nullable=False)
+    first_api_key_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("tenant_api_keys.id", ondelete="SET NULL")
+    )
+    first_requested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class DailyUsageRollup(Server2Base):
+    """Persistent daily request report; Redis remains the real-time limiter."""
+
+    __tablename__ = "daily_usage_rollups"
+    __table_args__ = (
+        CheckConstraint("request_count >= 0", name="request_count_nonnegative"),
+        CheckConstraint("rate_limited_count >= 0", name="rate_limited_count_nonnegative"),
+    )
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        ForeignKey("tenants.id", ondelete="CASCADE"), primary_key=True
+    )
+    usage_date: Mapped[date] = mapped_column(Date, primary_key=True)
+    request_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    rate_limited_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )

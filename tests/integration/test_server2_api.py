@@ -5,8 +5,8 @@ import hmac
 import json
 import os
 import time
-from datetime import UTC, datetime
-from uuid import uuid4
+from datetime import UTC, datetime, timedelta
+from uuid import UUID, uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -21,10 +21,13 @@ from packages.persistence.server2.models import (
     AppliedEvent,
     Category,
     ChangeEvent,
+    DailyUsageRollup,
+    MonthlyProductUsage,
     PublishedProduct,
     Tenant,
     TenantApiKey,
 )
+from packages.quota import DailyRateLimitResult
 
 SECRET = "w5-integration-secret"
 
@@ -43,6 +46,19 @@ class MemoryProductCache:
     async def delete(self, barcode: str) -> None:
         self.values.pop(barcode, None)
         self.deleted.append(barcode)
+
+
+class AllowAllRateLimiter:
+    async def check(
+        self, tenant_id: UUID, limit: int, *, now: datetime | None = None
+    ) -> DailyRateLimitResult:
+        current = now or datetime.now(UTC)
+        return DailyRateLimitResult(
+            allowed=True,
+            used=1,
+            limit=limit,
+            reset_at=current + timedelta(days=1),
+        )
 
 
 def unique_gtin13() -> str:
@@ -142,6 +158,7 @@ async def test_publication_replay_version_order_auth_and_cache() -> None:
             internal_sync_secret=SECRET,
         ),
         product_cache=cache,
+        rate_limiter=AllowAllRateLimiter(),
     )
     first = event(barcode, category_id, 1, name="Կաթ")
     try:
@@ -194,6 +211,7 @@ async def test_publication_replay_version_order_auth_and_cache() -> None:
                 "not_found",
                 "ok",
             ]
+            assert batch.json()["usage"]["monthly_unique_used"] == 1
 
             categories = await client.get("/v1/categories", headers=authorization)
             assert categories.status_code == 200
@@ -203,6 +221,12 @@ async def test_publication_replay_version_order_auth_and_cache() -> None:
             assert unauthenticated.status_code == 401
 
         async with session_factory() as session:
+            await session.execute(
+                delete(MonthlyProductUsage).where(MonthlyProductUsage.tenant_id == tenant_id)
+            )
+            await session.execute(
+                delete(DailyUsageRollup).where(DailyUsageRollup.tenant_id == tenant_id)
+            )
             applied_count = await session.scalar(
                 select(func.count())
                 .select_from(AppliedEvent)

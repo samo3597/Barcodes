@@ -23,6 +23,7 @@ from packages.contracts.product import (
     ProductResponse,
     PublicProduct,
 )
+from packages.contracts.usage import MonthlyProductUsage, UsageResponse, UsageSummary
 
 __all__ = [
     "AIBooleanValue",
@@ -38,6 +39,7 @@ __all__ = [
     "HealthResponse",
     "IngestBatchItem",
     "IngestBatchRequest",
+    "MonthlyProductUsage",
     "ProductBatchItem",
     "ProductBatchRequest",
     "ProductBatchResponse",
@@ -45,4 +47,6 @@ __all__ = [
     "ProductUpsertedEvent",
     "PublicationApplyResponse",
     "PublicProduct",
+    "UsageResponse",
+    "UsageSummary",
 ]

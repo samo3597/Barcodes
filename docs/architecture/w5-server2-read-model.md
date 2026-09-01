@@ -42,6 +42,5 @@ PostgreSQL-ը authoritative source-ն է։ Single և batch product հարցու�
 ## Սահմաններ
 
 - W5-ը չի հաշվում tenant quota կամ usage. դրանք W6-ի աշխատանքն են։
-- Feedback և public changes endpoint-ները W6-ում են, բայց դրանց append-only հիմքը արդեն կա։
+- Feedback և public changes endpoint-ները W7-ում են, բայց դրանց append-only հիմքը արդեն կա։
 - HMAC secret rotation-ը, version-gap alert-ը և load-test threshold-ները production hardening-ի մաս են։
-

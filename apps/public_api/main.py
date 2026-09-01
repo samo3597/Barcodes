@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from apps.public_api.routes.internal import router as internal_router
 from apps.public_api.routes.products import router as products_router
+from apps.public_api.routes.usage import router as usage_router
 from packages.cache import ProductCache, RedisProductCache
 from packages.config import ServiceSettings
 from packages.contracts import HealthResponse
@@ -16,6 +17,7 @@ from packages.observability.errors import install_error_handlers
 from packages.observability.http import install_http_observability
 from packages.observability.logging import configure_logging
 from packages.persistence.database import build_engine, build_session_factory, check_database
+from packages.quota import RateLimiter, RedisDailyRateLimiter
 
 ReadinessCheck = Callable[[], Awaitable[None]]
 
@@ -43,6 +45,7 @@ def create_app(
     settings: ServiceSettings | None = None,
     readiness_check: ReadinessCheck | None = None,
     product_cache: ProductCache | None = None,
+    rate_limiter: RateLimiter | None = None,
 ) -> FastAPI:
     """Build an independently deployable Server 2 application."""
 
@@ -52,6 +55,10 @@ def create_app(
     active_cache = product_cache or RedisProductCache(
         active_settings.redis_url,
         active_settings.product_cache_ttl_seconds,
+    )
+    active_rate_limiter = rate_limiter or RedisDailyRateLimiter(
+        active_settings.redis_url,
+        fail_open=active_settings.rate_limit_fail_open,
     )
     active_readiness_check = readiness_check or (lambda: check_database(engine))
 
@@ -64,6 +71,8 @@ def create_app(
             await engine.dispose()
             if isinstance(active_cache, RedisProductCache):
                 await active_cache.close()
+            if isinstance(active_rate_limiter, RedisDailyRateLimiter):
+                await active_rate_limiter.close()
 
     app = FastAPI(
         title="DaaS Barcodes Public API",
@@ -74,10 +83,14 @@ def create_app(
     install_error_handlers(app)
     app.state.session_factory = session_factory
     app.state.product_cache = active_cache
+    app.state.rate_limiter = active_rate_limiter
+    app.state.default_daily_request_limit = active_settings.daily_request_limit
+    app.state.default_monthly_unique_product_limit = active_settings.monthly_unique_product_limit
     app.state.internal_sync_secret = active_settings.internal_sync_secret
     app.state.internal_replay_window_seconds = active_settings.internal_replay_window_seconds
     app.include_router(internal_router)
     app.include_router(products_router)
+    app.include_router(usage_router)
 
     @app.get("/health/live", response_model=HealthResponse, tags=["health"])
     async def liveness() -> HealthResponse:

@@ -1,6 +1,7 @@
 """Shared FastAPI exception handlers for the stable error envelope."""
 
 import uuid
+from collections.abc import Mapping
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -14,9 +15,18 @@ def _request_id(request: Request) -> str:
     return getattr(request.state, "request_id", f"req_{uuid.uuid4()}")
 
 
-def _response(request: Request, status_code: int, error: ErrorBody) -> JSONResponse:
+def _response(
+    request: Request,
+    status_code: int,
+    error: ErrorBody,
+    headers: Mapping[str, str] | None = None,
+) -> JSONResponse:
     envelope = ErrorEnvelope(error=error, request_id=_request_id(request))
-    return JSONResponse(status_code=status_code, content=envelope.model_dump(mode="json"))
+    return JSONResponse(
+        status_code=status_code,
+        content=envelope.model_dump(mode="json"),
+        headers=headers,
+    )
 
 
 def install_error_handlers(app: FastAPI) -> None:
@@ -37,10 +47,13 @@ def install_error_handlers(app: FastAPI) -> None:
             if isinstance(supplied_details, dict):
                 details = supplied_details
 
+        response_headers = dict(getattr(request.state, "rate_limit_headers", {}))
+        response_headers.update(exc.headers or {})
         return _response(
             request,
             exc.status_code,
             ErrorBody(code=code, message=message, details=details, retryable=retryable),
+            response_headers or None,
         )
 
     @app.exception_handler(RequestValidationError)
