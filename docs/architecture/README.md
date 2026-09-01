@@ -1,6 +1,7 @@
 # Ճարտարապետություն
 
 - [W3 normalization և AI pipeline](w3-ai-pipeline.md)
+- [W4 canonical product, images և reliable publication](w4-canonical-publication.md)
 
 Այստեղ պահվում են համակարգի արդիական ճարտարապետական նկարագրությունները՝ բաղադրիչների սահմանները, Server 1 → Server 2 տվյալների հոսքը, deployment topology-ն և տվյալների մոդելի ընդհանուր տեսքը։
 

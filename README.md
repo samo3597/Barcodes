@@ -54,7 +54,7 @@ docker compose up --build
 
 ## Կարգավիճակ
 
-W1 foundation-ը, W2 ingest-ը և W3 normalization/AI pipeline-ը պատրաստ են։ Համակարգն այժմ ունի deterministic candidate merge, durable Celery jobs, provider-neutral adapter, immutable AI results, schema repair և versioned reprocess։ Հաջորդ փաթեթը W4 canonical product/version/outbox և image storage-ն է։
+W1–W4 աշխատանքային փաթեթները պատրաստ են։ Համակարգն այժմ ունի idempotent ingest, durable AI pipeline, immutable canonical versions, secure non-blocking image processing և transactional outbox։ Հաջորդ փաթեթը W5 Server 2-ի idempotent read model-ն ու public product API-ն է։
 
 ## Փաստաթղթեր
 
@@ -62,6 +62,7 @@ W1 foundation-ը, W2 ingest-ը և W3 normalization/AI pipeline-ը պատրաստ
 - [Փաստաթղթերի ինդեքս](docs/README.md)
 - [Ճարտարապետություն](docs/architecture/README.md)
 - [W3 AI pipeline](docs/architecture/w3-ai-pipeline.md)
+- [W4 canonical publication](docs/architecture/w4-canonical-publication.md)
 - [Տեխնիկական որոշումներ](docs/decisions/README.md)
 - [API contracts](docs/api/README.md)
 - [Source ingest API v1](docs/api/ingest-v1.md)

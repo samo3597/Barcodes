@@ -13,6 +13,8 @@ from packages.contracts.ingest import (
     IngestBatchItem,
     IngestBatchRequest,
 )
+from packages.contracts.internal import ProductUpsertedEvent
+from packages.contracts.product import PublicProduct
 
 __all__ = [
     "AIBooleanValue",
@@ -26,4 +28,6 @@ __all__ = [
     "HealthResponse",
     "IngestBatchItem",
     "IngestBatchRequest",
+    "ProductUpsertedEvent",
+    "PublicProduct",
 ]

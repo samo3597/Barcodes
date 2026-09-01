@@ -4,6 +4,7 @@ import pytest
 
 from apps.ingest_api.main import load_settings as load_ingest_settings
 from apps.public_api.main import load_settings as load_public_settings
+from packages.config import WorkerSettings
 
 
 def test_ingest_settings_accept_environment_override(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -31,3 +32,14 @@ def test_public_settings_accept_prefixed_env_file_values(
 
     assert settings.database_url == "postgresql+asyncpg://env-file/server2"
     assert settings.redis_url == "redis://env-file/2"
+
+
+def test_worker_treats_blank_optional_publication_settings_as_disabled() -> None:
+    settings = WorkerSettings(
+        database_url="postgresql+asyncpg://example/server1",
+        server2_internal_url="",
+        internal_sync_secret="",
+    )
+
+    assert settings.server2_internal_url is None
+    assert settings.internal_sync_secret is None

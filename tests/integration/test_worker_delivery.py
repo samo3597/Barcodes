@@ -14,9 +14,12 @@ from packages.persistence.database import build_engine, build_session_factory
 from packages.persistence.server1.models import (
     AIJob,
     AIResult,
+    CanonicalProduct,
     ImportBatch,
     ImportBatchItem,
+    OutboxEvent,
     ProductCandidate,
+    ProductVersion,
     Source,
     SourceProductRevision,
 )
@@ -75,7 +78,13 @@ async def test_celery_delivers_batch_to_completed_ai_result() -> None:
             await asyncio.sleep(0.25)
             async with session_factory() as session:
                 batch = await session.get(ImportBatch, batch_id)
-                if batch is not None and batch.status in {"completed", "failed"}:
+                canonical = await session.get(CanonicalProduct, barcode)
+                if (
+                    batch is not None
+                    and batch.status in {"completed", "failed"}
+                    and canonical is not None
+                    and canonical.current_version >= 1
+                ):
                     break
         else:
             pytest.fail("worker did not finish the batch within 10 seconds")
@@ -91,11 +100,22 @@ async def test_celery_delivers_batch_to_completed_ai_result() -> None:
                 select(AIResult).where(AIResult.candidate_id == candidate.id)
             )
             assert result is not None and result.status == "valid"
+            canonical = await session.get(CanonicalProduct, barcode)
+            assert canonical is not None and canonical.current_version == 1
+            event = await session.scalar(
+                select(OutboxEvent).where(OutboxEvent.aggregate_id == barcode)
+            )
+            assert event is not None and event.status == "pending"
             job_ids = list(
                 await session.scalars(select(AIJob.id).where(AIJob.candidate_ids.any(candidate.id)))
             )
     finally:
         async with session_factory() as session:
+            await session.execute(delete(OutboxEvent).where(OutboxEvent.aggregate_id == barcode))
+            await session.execute(delete(ProductVersion).where(ProductVersion.barcode == barcode))
+            await session.execute(
+                delete(CanonicalProduct).where(CanonicalProduct.barcode == barcode)
+            )
             if candidate_id is not None:
                 await session.execute(delete(AIResult).where(AIResult.candidate_id == candidate_id))
                 if job_ids:

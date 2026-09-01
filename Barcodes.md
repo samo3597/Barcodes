@@ -6,7 +6,7 @@ type: project
 status: active
 phase: 1
 created: 2026-08-25
-updated: 2026-08-29
+updated: 2026-09-01
 tags:
   - project
   - backend
@@ -21,7 +21,7 @@ tags:
 
 **Barcodes**-ը Data as a Service համակարգ է, որը տարբեր աղբյուրներից ընդունում է ապրանքային տվյալներ, պահպանում դրանց սկզբնական տարբերակներն ու պատմությունը, AI-ի միջոցով ձևավորում է միասնական կանոնական ապրանք և այն տրամադրում հաճախորդների 1C բազաներին արագ API-ով։
 
-**Ընթացիկ վիճակ․** W1 foundation-ը, W2 ingest vertical slice-ը և W3 normalization/AI pipeline-ը պատրաստ են։ Առկա են deterministic field merge, provider-neutral adapter, durable Celery jobs, immutable AI results, schema repair և versioned reprocess։ Հաջորդ քայլը W4 canonical product/version/outbox և image storage-ն է։
+**Ընթացիկ վիճակ․** W1–W4 փաթեթները պատրաստ են։ Առկա են idempotent ingest, durable AI pipeline, immutable canonical versions, non-blocking secure image processing, field-level audit diff և transactional outbox։ Հաջորդ քայլը W5 Server 2-ի idempotent receiver/read model և public API-ն է։
 
 Առաջին փուլի տեխնիկական աղբյուրը՝ [[Barcodes/DaaS_Barcodes_Phase1_Technical_Spec_AM.docx|DaaS Barcodes Phase 1 տեխնիկական պահանջ]]։
 
@@ -156,7 +156,7 @@ Server 2-ը ինքնուրույն read model է և runtime կախվածությ
 - [ ] Ընտրել AI provider-ը և սկզբնական model-ը։
 - [ ] Հաստատել category taxonomy-ի առաջին տարբերակը։
 - [ ] Ընտրել S3-compatible storage-ը։
-- [ ] Ընտրել internal sync-ի mTLS կամ HMAC տարբերակը։
+- [x] Ընտրել HMAC-SHA256-ը որպես MVP internal sync authentication։
 - [x] Ամրագրել UUIDv7-ը որպես ժամանակով դասավորվող identifier։
 - [ ] Հաստատել hosting topology-ն և target RPS-ը։
 - [x] Սահմանել source API key-ի high-entropy format-ը, `scrypt` hashing-ը, scopes-ը և revocation status-ը։
