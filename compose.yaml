@@ -115,6 +115,8 @@ services:
       LOG_LEVEL: INFO
       DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@postgres_server2:5432/barcodes_server2
       REDIS_URL: redis://redis_server2:6379/0
+      INTERNAL_SYNC_SECRET: ${INTERNAL_SYNC_SECRET:-dev-only-change-me}
+      PRODUCT_CACHE_TTL_SECONDS: 300
     ports:
       - "8002:8000"
     volumes:
@@ -139,6 +141,8 @@ services:
       AI_PROMPT_VERSION: product-v1
       IMAGE_STORAGE_ROOT: /data/barcodes
       IMAGE_PUBLIC_BASE_URL: http://localhost:8001/media
+      SERVER2_INTERNAL_URL: http://public_api:8000
+      INTERNAL_SYNC_SECRET: ${INTERNAL_SYNC_SECRET:-dev-only-change-me}
     volumes:
       - ./apps:/app/apps
       - ./packages:/app/packages
@@ -148,6 +152,8 @@ services:
         condition: service_healthy
       migrate_server1:
         condition: service_completed_successfully
+      public_api:
+        condition: service_started
 
 volumes:
   postgres_server1_data:

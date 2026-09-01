@@ -23,6 +23,14 @@ class ServiceSettings(BaseSettings):
     database_url: str
     redis_url: str
     image_storage_root: Path = Path("/data/barcodes")
+    product_cache_ttl_seconds: int = Field(default=300, ge=1, le=86_400)
+    internal_sync_secret: str | None = None
+    internal_replay_window_seconds: int = Field(default=300, ge=30, le=3_600)
+
+    @field_validator("internal_sync_secret", mode="before")
+    @classmethod
+    def blank_internal_secret_is_unset(cls, value: object) -> object:
+        return None if value == "" else value
 
 
 class WorkerSettings(BaseSettings):

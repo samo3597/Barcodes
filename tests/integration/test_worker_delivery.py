@@ -23,6 +23,12 @@ from packages.persistence.server1.models import (
     Source,
     SourceProductRevision,
 )
+from packages.persistence.server2.models import (
+    AppliedEvent,
+    Category,
+    ChangeEvent,
+    PublishedProduct,
+)
 
 
 def unique_gtin13() -> str:
@@ -40,9 +46,14 @@ async def test_celery_delivers_batch_to_completed_ai_result() -> None:
     if os.getenv("RUN_WORKER_INTEGRATION") != "1":
         pytest.skip("RUN_WORKER_INTEGRATION=1 is required")
     database_url = os.environ["TEST_DATABASE_URL"]
+    server2_database_url = os.environ["TEST_SERVER2_DATABASE_URL"]
     barcode = unique_gtin13()
+    category_root = f"smoke_{uuid4().hex}"
+    category_id = f"{category_root}.worker"
     engine = build_engine(database_url)
     session_factory = build_session_factory(engine)
+    server2_engine = build_engine(server2_database_url)
+    server2_session_factory = build_session_factory(server2_engine)
     source = Source(name=f"worker-smoke-{uuid4()}", status="active", field_priorities={})
     async with session_factory() as session:
         session.add(source)
@@ -61,7 +72,7 @@ async def test_celery_delivers_batch_to_completed_ai_result() -> None:
                             "atg_code": "0000",
                             "vat": True,
                             "is_weighted": False,
-                            "category": "Smoke",
+                            "category": category_id,
                         }
                     ]
                 }
@@ -74,20 +85,29 @@ async def test_celery_delivers_batch_to_completed_ai_result() -> None:
 
     try:
         celery_app.send_task("barcodes.process_import_batch", args=[str(batch_id)])
-        for _ in range(40):
+        for _ in range(80):
             await asyncio.sleep(0.25)
             async with session_factory() as session:
                 batch = await session.get(ImportBatch, batch_id)
                 canonical = await session.get(CanonicalProduct, barcode)
-                if (
-                    batch is not None
-                    and batch.status in {"completed", "failed"}
-                    and canonical is not None
-                    and canonical.current_version >= 1
-                ):
-                    break
+                event = await session.scalar(
+                    select(OutboxEvent).where(OutboxEvent.aggregate_id == barcode)
+                )
+            async with server2_session_factory() as session:
+                published = await session.get(PublishedProduct, barcode)
+            if (
+                batch is not None
+                and batch.status in {"completed", "failed"}
+                and canonical is not None
+                and canonical.current_version >= 1
+                and event is not None
+                and event.status == "delivered"
+                and published is not None
+                and published.version == 1
+            ):
+                break
         else:
-            pytest.fail("worker did not finish the batch within 10 seconds")
+            pytest.fail("worker did not publish the batch to Server 2 within 20 seconds")
 
         assert batch is not None and batch.status == "completed"
         async with session_factory() as session:
@@ -105,10 +125,15 @@ async def test_celery_delivers_batch_to_completed_ai_result() -> None:
             event = await session.scalar(
                 select(OutboxEvent).where(OutboxEvent.aggregate_id == barcode)
             )
-            assert event is not None and event.status == "pending"
+            assert event is not None and event.status == "delivered"
             job_ids = list(
                 await session.scalars(select(AIJob.id).where(AIJob.candidate_ids.any(candidate.id)))
             )
+        async with server2_session_factory() as session:
+            published = await session.get(PublishedProduct, barcode)
+            assert published is not None
+            assert published.version == 1
+            assert published.name == "Worker smoke product"
     finally:
         async with session_factory() as session:
             await session.execute(delete(OutboxEvent).where(OutboxEvent.aggregate_id == barcode))
@@ -132,4 +157,15 @@ async def test_celery_delivers_batch_to_completed_ai_result() -> None:
             await session.execute(delete(ImportBatch).where(ImportBatch.source_id == source_id))
             await session.execute(delete(Source).where(Source.id == source_id))
             await session.commit()
+        async with server2_session_factory() as session:
+            await session.execute(delete(ChangeEvent).where(ChangeEvent.barcode == barcode))
+            await session.execute(
+                delete(PublishedProduct).where(PublishedProduct.barcode == barcode)
+            )
+            await session.execute(delete(AppliedEvent).where(AppliedEvent.aggregate_id == barcode))
+            await session.execute(
+                delete(Category).where(Category.category_id.in_([category_id, category_root]))
+            )
+            await session.commit()
         await engine.dispose()
+        await server2_engine.dispose()

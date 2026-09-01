@@ -14,7 +14,7 @@ flowchart LR
     W --> H[Content-addressed storage]
     H --> C
     O --> U[Publisher worker]
-    U -. W5 .-> R[Server 2 idempotent receiver]
+    U --> R[Server 2 idempotent receiver]
 ```
 
 ## Ինչու է canonical product-ը բաժանված երկու table-ի
@@ -54,7 +54,7 @@ Local Docker միջավայրում storage adapter-ը named volume է և ingest
 
 ## Outbox retry և recovery
 
-Event lifecycle-ը `pending → processing → delivered` է։ Transient failure-ը դառնում է `retry_scheduled`՝ exponential backoff + jitter-ով։ Սահմանված փորձերից հետո event-ը անցնում է `dead_letter`, որպեսզի անվերջ poison retry չլինի։ HTTP `409`-ը համարվում է հաջող idempotent replay։
+Event lifecycle-ը `pending → processing → delivered` է։ Transient failure-ը դառնում է `retry_scheduled`՝ exponential backoff + jitter-ով։ Սահմանված փորձերից հետո event-ը անցնում է `dead_letter`, որպեսզի անվերջ poison retry չլինի։ Idempotent replay-ը Server 2-ից ստանում է `200`, իսկ նույն version-ի տարբեր payload-ի `409`-ը delivery conflict է։
 
 Queue-ի և worker-ի crash-ից հետո recovery command-ը գտնում է accepted batch-երը, AI job-երը, canonicalization-ից բաց թողնված result-ները, image fetch-երը և outbox work-ը․
 
@@ -67,7 +67,7 @@ docker compose run --rm worker python scripts/recover_processing.py --apply
 
 ## Սահմաններ և հետագա քայլեր
 
-- W4 publisher-ը HMAC ստորագրությամբ request contract ունի, բայց Server 2 endpoint-ը միտումնավոր ակտիվ չէ մինչև W5-ը։ Առանց `SERVER2_INTERNAL_URL`-ի event-երը մնում են `pending`։
+- W5-ից սկսած publisher-ը HMAC ստորագրությամբ ուղարկում է Server 2 receiver-ին։ Առանց `SERVER2_INTERNAL_URL`-ի publication-ը կարող է դիտավորյալ անջատվել, և event-երը մնում են `pending`։
 - DNS validation-ի և client connection-ի միջև փոքր TOCTOU պատուհան կա։ Production hardening-ում պետք է օգտագործել egress proxy/firewall կամ IP-pinned transport։
 - Local volume-ը development adapter է։ S3 versioning, lifecycle policy և CDN-ը deployment hardening-ի մաս են։
 - Metrics/alerts-ը պետք է ընդգրկեն outbox age, dead-letter count, failed image count և canonicalization latency։

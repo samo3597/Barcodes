@@ -98,7 +98,7 @@ docker compose run --rm worker python scripts/reprocess.py `
 
 ## W4 canonical version և outbox
 
-AI result-ից հետո նույն worker chain-ը ստեղծում է canonical product version և `product.upserted` outbox event։ Քանի դեռ W5 Server 2 receiver-ը պատրաստ չէ, publisher-ը config-ով անջատված է, և event-ը անվտանգ մնում է `pending` վիճակում։ Սա կորուստ չէ. database record-ն է հենց ապագա հրապարակման հերթը։
+AI result-ից հետո նույն worker chain-ը ստեղծում է canonical product version և `product.upserted` outbox event։ Publisher-ը այն ստորագրված internal request-ով հասցնում է Server 2։ Եթե կապը ժամանակավորապես չկա, event-ը մնում է database-ում և retry է արվում՝ տվյալը չի կորչում։
 
 Source image-ի մշակումը տեքստից անկախ է։ Սկզբում ապրանքը կարող է ստեղծվել առանց նկարի, ապա հաջող WebP normalization-ից հետո ստանալ հաջորդ version-ը։ Local պատկերները պահվում են Docker named volume-ում և մատուցվում են `http://localhost:8001/media/...` հասցեով։
 
@@ -110,6 +110,18 @@ docker compose run --rm worker python scripts/recover_processing.py --apply
 ```
 
 Մանրամասները՝ [W4 canonical publication](architecture/w4-canonical-publication.md)։
+
+## W5 public product API
+
+Server 2-ը ունի իր PostgreSQL read model-ը և Redis cache-ը։ Local tenant ստեղծիր այսպես՝
+
+```powershell
+docker compose run --rm public_api python scripts/create_tenant.py demo-tenant --name "Demo tenant"
+```
+
+Պահիր տպված `tnt_...` key-ը․ plaintext-ը database-ում չի պահվում և երկրորդ անգամ չի ցուցադրվում։ Այն կարող ես օգտագործել Public Swagger UI-ում՝ <http://localhost:8002/docs>։ Product-ի ամբողջ ճանապարհը տեսնելու համար նախ ingest արա source item և սպասիր worker-ին, ապա նույն barcode-ը հարցրու public API-ից։
+
+Մանրամասները՝ [W5 architecture](architecture/w5-server2-read-model.md) և [Public API v1](api/public-v1.md)։
 
 ## Health endpoint-ների տարբերությունը
 

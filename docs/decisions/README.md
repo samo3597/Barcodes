@@ -10,5 +10,6 @@
 4. [ADR-0004 — Provider-neutral AI pipeline](0004-provider-neutral-ai-pipeline.md)։
 5. [ADR-0005 — Canonical versioning և transactional outbox](0005-canonical-versioning-outbox.md)։
 6. [ADR-0006 — Non-blocking image processing և content-addressed storage](0006-image-processing-storage.md)։
+7. [ADR-0007 — Անկախ Server 2 read model և cache-aside Redis](0007-server2-read-model-cache.md)։
 
 Հաջորդ ADR-ների թեկնածուները՝ production object-storage provider և taxonomy versioning։

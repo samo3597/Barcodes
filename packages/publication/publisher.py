@@ -21,12 +21,12 @@ class PublisherError(RuntimeError):
 
 
 class HttpEventPublisher:
-    """Send one signed event; Server 2 will deduplicate by event_id in W5."""
+    """Send one signed event to Server 2's idempotent receiver."""
 
     def __init__(self, base_url: str, secret: str, timeout_seconds: float = 10.0) -> None:
         if not secret:
             raise ValueError("internal sync secret is required")
-        self.url = f"{base_url.rstrip('/')}/internal/v1/product-events"
+        self.base_url = base_url.rstrip("/")
         self.secret = secret.encode()
         self.timeout = timeout_seconds
 
@@ -38,13 +38,16 @@ class HttpEventPublisher:
         signature = hmac.new(self.secret, signed, hashlib.sha256).hexdigest()
         headers = {
             "Content-Type": "application/json",
+            "Idempotency-Key": event_id,
             "X-Event-Id": event_id,
             "X-Signature-Timestamp": timestamp,
             "X-Signature-SHA256": signature,
         }
+        barcode = str(payload["aggregate_id"])
+        url = f"{self.base_url}/internal/v1/products/{barcode}"
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(self.url, content=body, headers=headers)
-        if response.status_code not in {200, 201, 202, 204, 409}:
+            response = await client.put(url, content=body, headers=headers)
+        if response.status_code not in {200, 201, 202, 204}:
             raise PublisherError(f"Server 2 returned HTTP {response.status_code}")
 
 

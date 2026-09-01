@@ -13,8 +13,16 @@ from packages.contracts.ingest import (
     IngestBatchItem,
     IngestBatchRequest,
 )
-from packages.contracts.internal import ProductUpsertedEvent
-from packages.contracts.product import PublicProduct
+from packages.contracts.internal import ProductUpsertedEvent, PublicationApplyResponse
+from packages.contracts.product import (
+    CategoryItem,
+    CategoryListResponse,
+    ProductBatchItem,
+    ProductBatchRequest,
+    ProductBatchResponse,
+    ProductResponse,
+    PublicProduct,
+)
 
 __all__ = [
     "AIBooleanValue",
@@ -23,11 +31,18 @@ __all__ = [
     "AITextValue",
     "BatchAcceptedResponse",
     "BatchStatusResponse",
+    "CategoryItem",
+    "CategoryListResponse",
     "ErrorBody",
     "ErrorEnvelope",
     "HealthResponse",
     "IngestBatchItem",
     "IngestBatchRequest",
+    "ProductBatchItem",
+    "ProductBatchRequest",
+    "ProductBatchResponse",
+    "ProductResponse",
     "ProductUpsertedEvent",
+    "PublicationApplyResponse",
     "PublicProduct",
 ]
