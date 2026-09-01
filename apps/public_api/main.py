@@ -7,12 +7,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from apps.public_api.routes.internal import router as internal_router
+from apps.public_api.routes.products import router as products_router
+from packages.cache import ProductCache, RedisProductCache
 from packages.config import ServiceSettings
 from packages.contracts import HealthResponse
 from packages.observability.errors import install_error_handlers
 from packages.observability.http import install_http_observability
 from packages.observability.logging import configure_logging
-from packages.persistence.database import build_engine, check_database
+from packages.persistence.database import build_engine, build_session_factory, check_database
 
 ReadinessCheck = Callable[[], Awaitable[None]]
 
@@ -39,11 +42,17 @@ def load_settings() -> ServiceSettings:
 def create_app(
     settings: ServiceSettings | None = None,
     readiness_check: ReadinessCheck | None = None,
+    product_cache: ProductCache | None = None,
 ) -> FastAPI:
     """Build an independently deployable Server 2 application."""
 
     active_settings = settings or load_settings()
     engine: AsyncEngine = build_engine(active_settings.database_url)
+    session_factory = build_session_factory(engine)
+    active_cache = product_cache or RedisProductCache(
+        active_settings.redis_url,
+        active_settings.product_cache_ttl_seconds,
+    )
     active_readiness_check = readiness_check or (lambda: check_database(engine))
 
     @asynccontextmanager
@@ -53,6 +62,8 @@ def create_app(
             yield
         finally:
             await engine.dispose()
+            if isinstance(active_cache, RedisProductCache):
+                await active_cache.close()
 
     app = FastAPI(
         title="DaaS Barcodes Public API",
@@ -61,6 +72,12 @@ def create_app(
     )
     install_http_observability(app, active_settings.service_name)
     install_error_handlers(app)
+    app.state.session_factory = session_factory
+    app.state.product_cache = active_cache
+    app.state.internal_sync_secret = active_settings.internal_sync_secret
+    app.state.internal_replay_window_seconds = active_settings.internal_replay_window_seconds
+    app.include_router(internal_router)
+    app.include_router(products_router)
 
     @app.get("/health/live", response_model=HealthResponse, tags=["health"])
     async def liveness() -> HealthResponse:

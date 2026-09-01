@@ -43,6 +43,7 @@ jobs:
       SERVER1_DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@localhost:5433/barcodes_server1
       SERVER2_DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@localhost:5434/barcodes_server2
       TEST_DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@localhost:5433/barcodes_server1
+      TEST_SERVER2_DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@localhost:5434/barcodes_server2
 
     steps:
       - name: Check out repository

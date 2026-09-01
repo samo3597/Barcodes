@@ -161,7 +161,7 @@ def process_product_image(fetch_id: str) -> None:
 
 @app.task(name="barcodes.publish_outbox", acks_late=True)
 def publish_outbox() -> str:
-    """Drain ready events; delivery remains disabled until W5 exposes Server 2."""
+    """Drain ready events to Server 2 with retry scheduling on transient failure."""
 
     state, delay = asyncio.run(_publish_next())
     if state == "delivered":

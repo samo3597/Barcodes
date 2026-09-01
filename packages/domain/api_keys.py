@@ -32,11 +32,9 @@ def _derive(raw_key: str, salt: bytes) -> bytes:
     )
 
 
-def generate_source_api_key() -> GeneratedApiKey:
-    """Generate a high-entropy bearer key and its scrypt representation."""
-
+def _generate_api_key(kind: str) -> GeneratedApiKey:
     prefix = secrets.token_hex(6)
-    raw_key = f"src_{prefix}_{secrets.token_urlsafe(32)}"
+    raw_key = f"{kind}_{prefix}_{secrets.token_urlsafe(32)}"
     salt = secrets.token_bytes(16)
     digest = _derive(raw_key, salt)
     encoded_hash = "$".join(
@@ -52,13 +50,37 @@ def generate_source_api_key() -> GeneratedApiKey:
     return GeneratedApiKey(raw_key=raw_key, prefix=prefix, encoded_hash=encoded_hash)
 
 
-def extract_key_prefix(raw_key: str) -> str | None:
+def generate_source_api_key() -> GeneratedApiKey:
+    """Generate a high-entropy source bearer key."""
+
+    return _generate_api_key("src")
+
+
+def generate_tenant_api_key() -> GeneratedApiKey:
+    """Generate a high-entropy tenant bearer key."""
+
+    return _generate_api_key("tnt")
+
+
+def _extract_key_prefix(raw_key: str, kind: str) -> str | None:
     """Extract the public lookup prefix without exposing the secret portion."""
 
     parts = raw_key.split("_", maxsplit=2)
-    if len(parts) != 3 or parts[0] != "src" or len(parts[1]) != 12 or not parts[2]:
+    if len(parts) != 3 or parts[0] != kind or len(parts[1]) != 12 or not parts[2]:
         return None
     return parts[1]
+
+
+def extract_key_prefix(raw_key: str) -> str | None:
+    """Extract a source key lookup prefix."""
+
+    return _extract_key_prefix(raw_key, "src")
+
+
+def extract_tenant_key_prefix(raw_key: str) -> str | None:
+    """Extract a tenant key lookup prefix."""
+
+    return _extract_key_prefix(raw_key, "tnt")
 
 
 def verify_source_api_key(raw_key: str, encoded_hash: str) -> bool:
@@ -81,3 +103,9 @@ def verify_source_api_key(raw_key: str, encoded_hash: str) -> bool:
     except (ValueError, TypeError):
         return False
     return hmac.compare_digest(actual, expected)
+
+
+def verify_tenant_api_key(raw_key: str, encoded_hash: str) -> bool:
+    """Verify a tenant bearer key using the shared scrypt representation."""
+
+    return verify_source_api_key(raw_key, encoded_hash)

@@ -61,5 +61,5 @@ Outbox-ը լրացուցիչ table, worker և recovery logic է պահանջու
 1. [x] Ավելացնել canonical current/version schema և field diff։
 2. [x] Ավելացնել transaction-bound outbox event։
 3. [x] Ավելացնել claim/retry/dead-letter publisher և HMAC adapter։
-4. [ ] W5-ում իրականացնել idempotent Server 2 receiver-ը։
+4. [x] W5-ում իրականացնել idempotent Server 2 receiver-ը։
 5. [ ] Ավելացնել dead-letter alert և operator replay runbook։

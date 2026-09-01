@@ -21,7 +21,7 @@ tags:
 
 **Barcodes**-ը Data as a Service համակարգ է, որը տարբեր աղբյուրներից ընդունում է ապրանքային տվյալներ, պահպանում դրանց սկզբնական տարբերակներն ու պատմությունը, AI-ի միջոցով ձևավորում է միասնական կանոնական ապրանք և այն տրամադրում հաճախորդների 1C բազաներին արագ API-ով։
 
-**Ընթացիկ վիճակ․** W1–W4 փաթեթները պատրաստ են։ Առկա են idempotent ingest, durable AI pipeline, immutable canonical versions, non-blocking secure image processing, field-level audit diff և transactional outbox։ Հաջորդ քայլը W5 Server 2-ի idempotent receiver/read model և public API-ն է։
+**Ընթացիկ վիճակ․** W1–W5 փաթեթները պատրաստ են։ Առկա են idempotent ingest, durable AI pipeline, immutable canonical versions, non-blocking secure image processing, reliable Server 1 → Server 2 publication, tenant authentication և Redis-backed public product API։ Հաջորդ քայլը W6 quota, usage, feedback և changes API-ն է։
 
 Առաջին փուլի տեխնիկական աղբյուրը՝ [[Barcodes/DaaS_Barcodes_Phase1_Technical_Spec_AM.docx|DaaS Barcodes Phase 1 տեխնիկական պահանջ]]։
 

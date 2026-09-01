@@ -9,6 +9,7 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from packages.persistence.base import Server2Base
+from packages.persistence.server2 import models as server2_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
