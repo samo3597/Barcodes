@@ -6,7 +6,7 @@ type: project
 status: active
 phase: 1
 created: 2026-08-25
-updated: 2026-08-25
+updated: 2026-08-28
 tags:
   - project
   - backend
@@ -21,7 +21,7 @@ tags:
 
 **Barcodes**-ը Data as a Service համակարգ է, որը տարբեր աղբյուրներից ընդունում է ապրանքային տվյալներ, պահպանում դրանց սկզբնական տարբերակներն ու պատմությունը, AI-ի միջոցով ձևավորում է միասնական կանոնական ապրանք և այն տրամադրում հաճախորդների 1C բազաներին արագ API-ով։
 
-**Ընթացիկ վիճակ․** W1 foundation-ը պատրաստ է՝ երկու FastAPI app, shared packages, անկախ migrations, Docker Compose, tests և CI։ Հաջորդ քայլը W2 Server 1 ingest vertical slice-ն է։
+**Ընթացիկ վիճակ․** W1 foundation-ը պատրաստ է, իսկ W2 Server 1 ingest vertical slice-ն իրականացված է՝ source API key authentication, idempotent batch ընդունում, immutable raw revisions, batch status և validation։ Հաջորդ քայլը W3 normalization/AI processing pipeline-ն է։
 
 Առաջին փուլի տեխնիկական աղբյուրը՝ [[Barcodes/DaaS_Barcodes_Phase1_Technical_Spec_AM.docx|DaaS Barcodes Phase 1 տեխնիկական պահանջ]]։
 
@@ -157,9 +157,9 @@ Server 2-ը ինքնուրույն read model է և runtime կախվածությ
 - [ ] Հաստատել category taxonomy-ի առաջին տարբերակը։
 - [ ] Ընտրել S3-compatible storage-ը։
 - [ ] Ընտրել internal sync-ի mTLS կամ HMAC տարբերակը։
-- [ ] Ամրագրել UUIDv7 կամ ULID ընտրությունը։
+- [x] Ամրագրել UUIDv7-ը որպես ժամանակով դասավորվող identifier։
 - [ ] Հաստատել hosting topology-ն և target RPS-ը։
-- [ ] Սահմանել API key hashing/rotation քաղաքականությունը։
+- [x] Սահմանել source API key-ի high-entropy format-ը, `scrypt` hashing-ը, scopes-ը և revocation status-ը։
 - [ ] Պատրաստել 300–500 ապրանքի gold dataset։
 
 ## Փաստաթղթերի քարտեզ

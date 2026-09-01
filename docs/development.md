@@ -53,6 +53,16 @@ docker compose up --build
 - Ingest liveness՝ <http://localhost:8001/health/live>
 - Public liveness՝ <http://localhost:8002/health/live>
 
+### Առաջին source-ը և ingest հարցումը
+
+Migration-ների ավարտից հետո ստեղծիր local source credential՝
+
+```powershell
+docker compose run --rm ingest_api python scripts/create_source.py demo-source
+```
+
+Հրամանը API key-ը ցույց է տալիս միայն մեկ անգամ։ Պահիր այն local secret manager-ում կամ ժամանակավոր PowerShell variable-ում և մի commit արա Git-ում։ Այնուհետև կարող ես հարցումն ուղարկել Swagger UI-ից՝ <http://localhost:8001/docs>, կամ հետևել [ingest API-ի օրինակին](api/ingest-v1.md)։
+
 Դադարեցնելու համար՝
 
 ```powershell
@@ -78,4 +88,3 @@ GitHub Actions-ը նույն ստուգումները կատարում է յու
 - `/health/ready` պատասխանում է՝ ծառայությունը պատրա՞ստ է իրական հարցումներ ընդունել, ներառյալ database կապը։
 
 Այս տարբերությունը deployment համակարգին թույլ է տալիս վերագործարկել մահացած պրոցեսը, բայց ժամանակավորապես traffic չուղարկել այն instance-ին, որի database-ը դեռ հասանելի չէ։
-

@@ -12,7 +12,13 @@ NAMING_CONVENTION = {
 }
 
 
-class Base(DeclarativeBase):
-    """Base class whose naming convention makes migrations deterministic."""
+class Server1Base(DeclarativeBase):
+    """Declarative base for private ingestion and processing data."""
+
+    metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+
+class Server2Base(DeclarativeBase):
+    """Declarative base for the independent public read model."""
 
     metadata = MetaData(naming_convention=NAMING_CONVENTION)

@@ -54,7 +54,7 @@ docker compose up --build
 
 ## Կարգավիճակ
 
-W1 foundation-ը ներառում է shared contracts, երկու FastAPI application factory, առանձին migrations, local Docker Compose, health/metrics endpoint-ներ, tests և CI։ Հաջորդ փաթեթը W2 Server 1 ingest-ն է։
+W1 foundation-ը պատրաստ է։ W2-ում արդեն ավելացված է Server 1 ingest vertical slice-ը՝ source API key authentication, idempotent batch ընդունում, immutable raw revisions, batch status և validation սահմանափակումներ։ Հաջորդ փաթեթը W3 normalization/AI processing pipeline-ն է։
 
 ## Փաստաթղթեր
 
@@ -63,5 +63,6 @@ W1 foundation-ը ներառում է shared contracts, երկու FastAPI applic
 - [Ճարտարապետություն](docs/architecture/README.md)
 - [Տեխնիկական որոշումներ](docs/decisions/README.md)
 - [API contracts](docs/api/README.md)
+- [Source ingest API v1](docs/api/ingest-v1.md)
 - [Runbooks](docs/runbooks/README.md)
 - [Մշակման միջավայր](docs/development.md)

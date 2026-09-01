@@ -7,12 +7,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from apps.ingest_api.middleware import IngestBodyMiddleware
+from apps.ingest_api.routes.batches import router as batches_router
 from packages.config import ServiceSettings
 from packages.contracts import HealthResponse
 from packages.observability.errors import install_error_handlers
 from packages.observability.http import install_http_observability
 from packages.observability.logging import configure_logging
-from packages.persistence.database import build_engine, check_database
+from packages.persistence.database import build_engine, build_session_factory, check_database
 
 ReadinessCheck = Callable[[], Awaitable[None]]
 
@@ -44,6 +46,7 @@ def create_app(
 
     active_settings = settings or load_settings()
     engine: AsyncEngine = build_engine(active_settings.database_url)
+    session_factory = build_session_factory(engine)
     active_readiness_check = readiness_check or (lambda: check_database(engine))
 
     @asynccontextmanager
@@ -61,6 +64,10 @@ def create_app(
     )
     install_http_observability(app, active_settings.service_name)
     install_error_handlers(app)
+    app.add_middleware(IngestBodyMiddleware)
+    app.state.engine = engine
+    app.state.session_factory = session_factory
+    app.include_router(batches_router)
 
     @app.get("/health/live", response_model=HealthResponse, tags=["health"])
     async def liveness() -> HealthResponse:

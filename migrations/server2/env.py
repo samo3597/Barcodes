@@ -8,7 +8,7 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from packages.persistence.base import Base
+from packages.persistence.base import Server2Base
 
 config = context.config
 if config.config_file_name is not None:
@@ -18,7 +18,7 @@ config.set_main_option(
     "sqlalchemy.url",
     os.environ.get("DATABASE_URL", config.get_main_option("sqlalchemy.url")),
 )
-target_metadata = Base.metadata
+target_metadata = Server2Base.metadata
 
 
 def run_migrations_offline() -> None:

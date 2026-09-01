@@ -4,10 +4,9 @@
 
 API contract-ների հիմնական խմբերը՝
 
-- Source ingest API։
+- [Source ingest API v1](ingest-v1.md)։
 - Server 1 → Server 2 internal publication API։
 - Public products և batch API։
 - Usage և quota API։
 - Feedback intake API։
 - Changes cursor API։
-

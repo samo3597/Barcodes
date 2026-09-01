@@ -12,6 +12,7 @@ COPY pyproject.toml README.md ./
 COPY apps ./apps
 COPY packages ./packages
 COPY migrations ./migrations
+COPY scripts ./scripts
 COPY alembic-server1.ini alembic-server2.ini ./
 
 RUN python -m pip install --no-cache-dir .
@@ -25,4 +26,3 @@ RUN python -m pip install --no-cache-dir ".[dev]"
 USER app
 
 FROM base AS runtime
-
