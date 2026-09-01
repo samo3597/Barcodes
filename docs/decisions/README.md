@@ -2,12 +2,10 @@
 
 Յուրաքանչյուր նշանակալի տեխնիկական ընտրություն պահվում է առանձին ADR ֆայլում։ Առաջարկվող անունը՝ `NNNN-short-title.md`։
 
-Առաջին ADR-ների թեկնածուները՝
+Ընդունված ADR-ները՝
 
-1. ID format՝ UUIDv7 կամ ULID։
-2. Queue implementation և task delivery contract։
-3. AI provider adapter և առաջին provider։
-4. Server 1 → Server 2 authentication՝ mTLS կամ HMAC։
-5. Object storage և image publication մոդել։
-6. Category taxonomy-ի versioning։
+1. [ADR-0001 — Python monorepo](0001-python-monorepo.md)։
+2. [ADR-0002 — Server-ների առանձին database-ներ](0002-separate-databases.md)։
+3. [ADR-0003 — Docker-first development](0003-docker-first-development.md)։
 
+Հաջորդ ADR-ների թեկնածուները՝ ID format, queue delivery contract, AI provider, internal sync authentication, object storage և taxonomy versioning։

@@ -1,0 +1,147 @@
+name: daas-barcodes
+
+x-api-base: &api-base
+  build:
+    context: .
+    target: development
+  environment:
+    ENVIRONMENT: development
+    LOG_LEVEL: INFO
+  restart: unless-stopped
+
+services:
+  postgres_server1:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: barcodes_server1
+      POSTGRES_USER: barcodes
+      POSTGRES_PASSWORD: barcodes
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_server1_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U barcodes -d barcodes_server1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  postgres_server2:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: barcodes_server2
+      POSTGRES_USER: barcodes
+      POSTGRES_PASSWORD: barcodes
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_server2_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U barcodes -d barcodes_server2"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis_server1:
+    image: redis:7.4-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis_server2:
+    image: redis:7.4-alpine
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate_server1:
+    <<: *api-base
+    command: ["alembic", "-c", "alembic-server1.ini", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@postgres_server1:5432/barcodes_server1
+    depends_on:
+      postgres_server1:
+        condition: service_healthy
+    restart: "no"
+
+  migrate_server2:
+    <<: *api-base
+    command: ["alembic", "-c", "alembic-server2.ini", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@postgres_server2:5432/barcodes_server2
+    depends_on:
+      postgres_server2:
+        condition: service_healthy
+    restart: "no"
+
+  ingest_api:
+    <<: *api-base
+    command:
+      ["uvicorn", "apps.ingest_api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      SERVICE_NAME: ingest-api
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@postgres_server1:5432/barcodes_server1
+      REDIS_URL: redis://redis_server1:6379/0
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./apps:/app/apps
+      - ./packages:/app/packages
+    depends_on:
+      migrate_server1:
+        condition: service_completed_successfully
+      redis_server1:
+        condition: service_healthy
+
+  public_api:
+    <<: *api-base
+    command:
+      ["uvicorn", "apps.public_api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      SERVICE_NAME: public-api
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@postgres_server2:5432/barcodes_server2
+      REDIS_URL: redis://redis_server2:6379/0
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./apps:/app/apps
+      - ./packages:/app/packages
+    depends_on:
+      migrate_server2:
+        condition: service_completed_successfully
+      redis_server2:
+        condition: service_healthy
+
+  worker:
+    <<: *api-base
+    command: ["celery", "-A", "apps.workers.celery_app:app", "worker", "--loglevel=INFO"]
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+      CELERY_BROKER_URL: redis://redis_server1:6379/0
+      CELERY_RESULT_BACKEND: redis://redis_server1:6379/1
+    volumes:
+      - ./apps:/app/apps
+      - ./packages:/app/packages
+    depends_on:
+      redis_server1:
+        condition: service_healthy
+      migrate_server1:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_server1_data:
+  postgres_server2_data:
+

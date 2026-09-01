@@ -38,9 +38,23 @@ Barcodes/
 └── scripts/
 ```
 
+## Արագ մեկնարկ
+
+Պահանջվում է Docker Desktop։
+
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
+```
+
+- Ingest API՝ <http://localhost:8001/docs>
+- Public API՝ <http://localhost:8002/docs>
+
+Մանրամասն և սկսնակին հարմար բացատրությունը՝ [docs/development.md](docs/development.md)։
+
 ## Կարգավիճակ
 
-Repository skeleton-ը պատրաստ է։ Կիրառական կոդի առաջին աշխատանքային փաթեթը W1-ն է՝ shared contracts, FastAPI skeleton, migrations, CI և local Docker Compose։
+W1 foundation-ը ներառում է shared contracts, երկու FastAPI application factory, առանձին migrations, local Docker Compose, health/metrics endpoint-ներ, tests և CI։ Հաջորդ փաթեթը W2 Server 1 ingest-ն է։
 
 ## Փաստաթղթեր
 
@@ -50,4 +64,4 @@ Repository skeleton-ը պատրաստ է։ Կիրառական կոդի առաջ�
 - [Տեխնիկական որոշումներ](docs/decisions/README.md)
 - [API contracts](docs/api/README.md)
 - [Runbooks](docs/runbooks/README.md)
-
+- [Մշակման միջավայր](docs/development.md)
