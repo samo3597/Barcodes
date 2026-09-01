@@ -5,6 +5,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, status
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from apps.ingest_api.middleware import IngestBodyMiddleware
@@ -69,6 +70,11 @@ def create_app(
     app.state.session_factory = session_factory
     app.state.enqueue_batches = active_settings.environment != "test"
     app.include_router(batches_router)
+    app.mount(
+        "/media",
+        StaticFiles(directory=active_settings.image_storage_root, check_dir=False),
+        name="product-images",
+    )
 
     @app.get("/health/live", response_model=HealthResponse, tags=["health"])
     async def liveness() -> HealthResponse:

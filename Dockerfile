@@ -6,7 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN groupadd --system app && useradd --system --gid app --home /app app
+RUN groupadd --system app && useradd --system --gid app --home /app app \
+    && mkdir -p /data/barcodes \
+    && chown -R app:app /data/barcodes
 
 COPY pyproject.toml README.md ./
 COPY apps ./apps

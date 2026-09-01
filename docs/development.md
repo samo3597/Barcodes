@@ -96,6 +96,21 @@ docker compose run --rm worker python scripts/reprocess.py `
   --prompt-version product-v2
 ```
 
+## W4 canonical version և outbox
+
+AI result-ից հետո նույն worker chain-ը ստեղծում է canonical product version և `product.upserted` outbox event։ Քանի դեռ W5 Server 2 receiver-ը պատրաստ չէ, publisher-ը config-ով անջատված է, և event-ը անվտանգ մնում է `pending` վիճակում։ Սա կորուստ չէ. database record-ն է հենց ապագա հրապարակման հերթը։
+
+Source image-ի մշակումը տեքստից անկախ է։ Սկզբում ապրանքը կարող է ստեղծվել առանց նկարի, ապա հաջող WebP normalization-ից հետո ստանալ հաջորդ version-ը։ Local պատկերները պահվում են Docker named volume-ում և մատուցվում են `http://localhost:8001/media/...` հասցեով։
+
+Եթե broker/worker-ը կանգնել է transaction-ների միջև, նախ dry-run արա, ապա հաստատված արդյունքի դեպքում կիրառիր recovery-ն․
+
+```powershell
+docker compose run --rm worker python scripts/recover_processing.py
+docker compose run --rm worker python scripts/recover_processing.py --apply
+```
+
+Մանրամասները՝ [W4 canonical publication](architecture/w4-canonical-publication.md)։
+
 ## Health endpoint-ների տարբերությունը
 
 - `/health/live` պատասխանում է՝ պրոցեսն աշխատո՞ւմ է։

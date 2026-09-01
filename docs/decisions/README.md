@@ -8,5 +8,7 @@
 2. [ADR-0002 — Server-ների առանձին database-ներ](0002-separate-databases.md)։
 3. [ADR-0003 — Docker-first development](0003-docker-first-development.md)։
 4. [ADR-0004 — Provider-neutral AI pipeline](0004-provider-neutral-ai-pipeline.md)։
+5. [ADR-0005 — Canonical versioning և transactional outbox](0005-canonical-versioning-outbox.md)։
+6. [ADR-0006 — Non-blocking image processing և content-addressed storage](0006-image-processing-storage.md)։
 
-Հաջորդ ADR-ների թեկնածուները՝ internal sync authentication, object storage և taxonomy versioning։
+Հաջորդ ADR-ների թեկնածուները՝ production object-storage provider և taxonomy versioning։
