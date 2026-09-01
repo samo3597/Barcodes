@@ -3,7 +3,7 @@
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import AnyHttpUrl, Field, TypeAdapter, field_validator
+from pydantic import AnyHttpUrl, Field, TypeAdapter, field_validator, model_validator
 
 from packages.contracts.common import StrictContract
 from packages.domain.ingest import normalize_barcode, validate_name
@@ -74,6 +74,13 @@ class IngestBatchRequest(StrictContract):
 
     external_batch_id: str | None = Field(default=None, min_length=1, max_length=200)
     items: list[IngestBatchItem] = Field(min_length=1, max_length=1000)
+
+    @model_validator(mode="after")
+    def require_unique_source_record_ids(self) -> "IngestBatchRequest":
+        record_ids = [item.source_record_id for item in self.items]
+        if len(record_ids) != len(set(record_ids)):
+            raise ValueError("source_record_id must be unique within one batch")
+        return self
 
 
 class BatchAcceptedResponse(StrictContract):

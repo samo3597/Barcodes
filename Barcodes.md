@@ -6,7 +6,7 @@ type: project
 status: active
 phase: 1
 created: 2026-08-25
-updated: 2026-08-28
+updated: 2026-08-29
 tags:
   - project
   - backend
@@ -21,7 +21,7 @@ tags:
 
 **Barcodes**-ը Data as a Service համակարգ է, որը տարբեր աղբյուրներից ընդունում է ապրանքային տվյալներ, պահպանում դրանց սկզբնական տարբերակներն ու պատմությունը, AI-ի միջոցով ձևավորում է միասնական կանոնական ապրանք և այն տրամադրում հաճախորդների 1C բազաներին արագ API-ով։
 
-**Ընթացիկ վիճակ․** W1 foundation-ը պատրաստ է, իսկ W2 Server 1 ingest vertical slice-ն իրականացված է՝ source API key authentication, idempotent batch ընդունում, immutable raw revisions, batch status և validation։ Հաջորդ քայլը W3 normalization/AI processing pipeline-ն է։
+**Ընթացիկ վիճակ․** W1 foundation-ը, W2 ingest vertical slice-ը և W3 normalization/AI pipeline-ը պատրաստ են։ Առկա են deterministic field merge, provider-neutral adapter, durable Celery jobs, immutable AI results, schema repair և versioned reprocess։ Հաջորդ քայլը W4 canonical product/version/outbox և image storage-ն է։
 
 Առաջին փուլի տեխնիկական աղբյուրը՝ [[Barcodes/DaaS_Barcodes_Phase1_Technical_Spec_AM.docx|DaaS Barcodes Phase 1 տեխնիկական պահանջ]]։
 
@@ -116,8 +116,8 @@ Server 2-ը ինքնուրույն read model է և runtime կախվածությ
 | W0 | Տեխնիկական որոշումներ և ամրագրված contracts | — |
 | W1 | Monorepo skeleton, CI և local Compose | W0 |
 | W2 | Server 1 ingest, sources, batches և validators | W1 |
-| W3 | Normalization, images, AI pipeline և reprocess | W2 |
-| W4 | Canonical product, versioning և outbox | W2–W3 |
+| W3 | Normalization, AI pipeline և reprocess | W2 |
+| W4 | Canonical product, images, versioning և outbox | W2–W3 |
 | W5 | Server 2 products, batch, categories, auth և cache | W1 |
 | W6 | Quota, usage, feedback և changes API | W4–W5 |
 | W7 | Load/failure/security tests, backup և production hardening | Բոլորը |

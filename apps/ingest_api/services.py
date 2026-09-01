@@ -12,6 +12,7 @@ from packages.domain.identifiers import new_uuid7
 from packages.domain.ingest import canonical_payload_hash, normalize_barcode
 from packages.persistence.server1.models import ImportBatch
 from packages.persistence.server1.repositories import (
+    RevisionInsert,
     find_batch_by_idempotency_key,
     find_batch_for_source,
     insert_revisions_ignoring_duplicates,
@@ -73,8 +74,8 @@ async def accept_batch(
         _assert_matching_payload(concurrent, request_hash)
         return AcceptedBatch(concurrent, duplicate_request=True)
 
-    revisions: list[dict[str, object]] = []
-    for item in payload.items:
+    revisions: list[RevisionInsert] = []
+    for position, item in enumerate(payload.items):
         raw_payload = item.model_dump(mode="json")
         revisions.append(
             {
@@ -91,6 +92,7 @@ async def accept_batch(
                     if item.source_updated_at is not None
                     else None
                 ),
+                "position": position,
             }
         )
     await insert_revisions_ignoring_duplicates(session, revisions)

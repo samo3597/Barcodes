@@ -76,9 +76,13 @@ jobs:
           DATABASE_URL: ${{ env.SERVER2_DATABASE_URL }}
         run: alembic -c alembic-server2.ini upgrade head
 
+      - name: Check migration drift
+        run: |
+          DATABASE_URL=${{ env.SERVER1_DATABASE_URL }} alembic -c alembic-server1.ini check
+          DATABASE_URL=${{ env.SERVER2_DATABASE_URL }} alembic -c alembic-server2.ini check
+
       - name: Test
         run: pytest
 
       - name: Build runtime image
         run: docker build --target runtime -t daas-barcodes:${{ github.sha }} .
-
