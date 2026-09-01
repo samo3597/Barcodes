@@ -117,6 +117,9 @@ services:
       REDIS_URL: redis://redis_server2:6379/0
       INTERNAL_SYNC_SECRET: ${INTERNAL_SYNC_SECRET:-dev-only-change-me}
       PRODUCT_CACHE_TTL_SECONDS: 300
+      DAILY_REQUEST_LIMIT: 1000
+      MONTHLY_UNIQUE_PRODUCT_LIMIT: 100
+      RATE_LIMIT_FAIL_OPEN: "true"
     ports:
       - "8002:8000"
     volumes:

@@ -123,6 +123,12 @@ docker compose run --rm public_api python scripts/create_tenant.py demo-tenant -
 
 Մանրամասները՝ [W5 architecture](architecture/w5-server2-read-model.md) և [Public API v1](api/public-v1.md)։
 
+## W6 quota և usage
+
+Նոր tenant-ի default key-ն ունի նաև `usage:read` scope։ Նրա plan limits-ը կարելի է local database-ում `plan_config`-ով սահմանել, իսկ global default-ները `.env`-ում են՝ `DAILY_REQUEST_LIMIT=1000` և `MONTHLY_UNIQUE_PRODUCT_LIMIT=100`։
+
+Product-ի հաջող առաջին հարցումը ստեղծում է monthly usage row։ Նույն barcode-ի կրկնությունը նորից չի հաշվում։ Օրվա և ամսվա վիճակը տեսնելու համար օգտագործիր `GET /v1/usage` endpoint-ը Public Swagger UI-ում։ Մանրամասն transaction և failure policy-ն՝ [W6 architecture](architecture/w6-quota-usage.md)։
+
 ## Health endpoint-ների տարբերությունը
 
 - `/health/live` պատասխանում է՝ պրոցեսն աշխատո՞ւմ է։

@@ -24,6 +24,9 @@ class ServiceSettings(BaseSettings):
     redis_url: str
     image_storage_root: Path = Path("/data/barcodes")
     product_cache_ttl_seconds: int = Field(default=300, ge=1, le=86_400)
+    daily_request_limit: int = Field(default=1_000, ge=0)
+    monthly_unique_product_limit: int = Field(default=100, ge=0)
+    rate_limit_fail_open: bool = True
     internal_sync_secret: str | None = None
     internal_replay_window_seconds: int = Field(default=300, ge=30, le=3_600)
 

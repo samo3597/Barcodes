@@ -6,6 +6,7 @@ from typing import Annotated, Literal
 from pydantic import AnyHttpUrl, Field, StringConstraints, field_validator, model_validator
 
 from packages.contracts.common import StrictContract
+from packages.contracts.usage import MonthlyProductUsage
 from packages.domain.ingest import normalize_barcode
 
 Barcode = Annotated[str, StringConstraints(pattern=r"^[0-9]{8,14}$")]
@@ -77,6 +78,7 @@ class ProductBatchItem(StrictContract):
 
 class ProductBatchResponse(StrictContract):
     results: list[ProductBatchItem]
+    usage: MonthlyProductUsage
     request_id: str
 
 

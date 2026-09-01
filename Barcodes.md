@@ -21,7 +21,7 @@ tags:
 
 **Barcodes**-ը Data as a Service համակարգ է, որը տարբեր աղբյուրներից ընդունում է ապրանքային տվյալներ, պահպանում դրանց սկզբնական տարբերակներն ու պատմությունը, AI-ի միջոցով ձևավորում է միասնական կանոնական ապրանք և այն տրամադրում հաճախորդների 1C բազաներին արագ API-ով։
 
-**Ընթացիկ վիճակ․** W1–W5 փաթեթները պատրաստ են։ Առկա են idempotent ingest, durable AI pipeline, immutable canonical versions, non-blocking secure image processing, reliable Server 1 → Server 2 publication, tenant authentication և Redis-backed public product API։ Հաջորդ քայլը W6 quota, usage, feedback և changes API-ն է։
+**Ընթացիկ վիճակ․** W1–W6 փաթեթները պատրաստ են։ Առկա են idempotent ingest, durable AI pipeline, immutable canonical versions, non-blocking secure image processing, reliable Server 1 → Server 2 publication, tenant authentication, Redis-backed public product API և race-safe quota/usage accounting։ Հաջորդ քայլը W7 append-only feedback և cursor-based changes API-ն է։
 
 Առաջին փուլի տեխնիկական աղբյուրը՝ [[Barcodes/DaaS_Barcodes_Phase1_Technical_Spec_AM.docx|DaaS Barcodes Phase 1 տեխնիկական պահանջ]]։
 
@@ -119,8 +119,9 @@ Server 2-ը ինքնուրույն read model է և runtime կախվածությ
 | W3 | Normalization, AI pipeline և reprocess | W2 |
 | W4 | Canonical product, images, versioning և outbox | W2–W3 |
 | W5 | Server 2 products, batch, categories, auth և cache | W1 |
-| W6 | Quota, usage, feedback և changes API | W4–W5 |
-| W7 | Load/failure/security tests, backup և production hardening | Բոլորը |
+| W6 | Daily request limit, monthly unique barcode և usage reports | W5 |
+| W7 | Append-only feedback և cursor-based changes API | W4–W6 |
+| W8 | Load/failure/security tests, backup և production hardening | Բոլորը |
 
 Մոտավոր տևողությունը երկու backend ծրագրավորողի և part-time DevOps-ի դեպքում՝ **10–12 շաբաթ**։
 
