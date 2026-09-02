@@ -9,3 +9,4 @@
 - `api/` — OpenAPI contract-ներ և integration օրինակներ։
 - `runbooks/` — deployment, rollback, backup/restore և incident ընթացակարգեր։
 
+`docs/business/`-ը նախատեսված է local վաճառքի և հետազոտության նյութերի համար և ամբողջությամբ անտեսվում է Git-ի կողմից։ Այնտեղ մի պահեք տեխնիկական փաստաթուղթ, որը պետք է հասանելի լինի repository-ի մասնակիցներին։

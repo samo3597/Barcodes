@@ -155,3 +155,5 @@ def require_scope(scope: str) -> Callable[..., Awaitable[TenantPrincipal]]:
 ProductReader = Annotated[TenantPrincipal, Depends(require_scope("products:read"))]
 CategoryReader = Annotated[TenantPrincipal, Depends(require_scope("categories:read"))]
 UsageReader = Annotated[TenantPrincipal, Depends(require_scope("usage:read"))]
+FeedbackWriter = Annotated[TenantPrincipal, Depends(require_scope("feedback:write"))]
+ChangesReader = Annotated[TenantPrincipal, Depends(require_scope("changes:read"))]

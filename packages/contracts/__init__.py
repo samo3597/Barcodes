@@ -7,6 +7,13 @@ from packages.contracts.ai import (
     AITextValue,
 )
 from packages.contracts.common import ErrorBody, ErrorEnvelope, HealthResponse
+from packages.contracts.feedback import (
+    ChangeItem,
+    ChangesResponse,
+    FeedbackFieldChange,
+    FeedbackRequest,
+    FeedbackResponse,
+)
 from packages.contracts.ingest import (
     BatchAcceptedResponse,
     BatchStatusResponse,
@@ -34,8 +41,13 @@ __all__ = [
     "BatchStatusResponse",
     "CategoryItem",
     "CategoryListResponse",
+    "ChangeItem",
+    "ChangesResponse",
     "ErrorBody",
     "ErrorEnvelope",
+    "FeedbackFieldChange",
+    "FeedbackRequest",
+    "FeedbackResponse",
     "HealthResponse",
     "IngestBatchItem",
     "IngestBatchRequest",

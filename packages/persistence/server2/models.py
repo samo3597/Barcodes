@@ -150,6 +150,40 @@ class ChangeEvent(Server2Base):
     changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class FeedbackEvent(Server2Base):
+    """Append-only operator feedback, isolated from the published read model."""
+
+    __tablename__ = "feedback_events"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "idempotency_key", name="uq_feedback_tenant_idempotency"),
+        CheckConstraint("action IN ('accepted', 'corrected', 'rejected')", name="action_allowed"),
+        Index("ix_feedback_events_received_at", "received_at"),
+    )
+
+    sequence_id: Mapped[int] = mapped_column(BigInteger, Identity(always=False), primary_key=True)
+    event_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), default=new_uuid7, unique=True, nullable=False
+    )
+    tenant_id: Mapped[UUID] = mapped_column(
+        ForeignKey("tenants.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    api_key_id: Mapped[UUID] = mapped_column(
+        ForeignKey("tenant_api_keys.id", ondelete="RESTRICT"), nullable=False
+    )
+    idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    barcode: Mapped[str] = mapped_column(String(14), index=True, nullable=False)
+    product_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    action: Mapped[str] = mapped_column(String(20), nullable=False)
+    operator_ref: Mapped[str | None] = mapped_column(String(255))
+    fields: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
+    client_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    request_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
 class MonthlyProductUsage(Server2Base):
     """Authoritative fact that a tenant received a barcode in a billing month."""
 

@@ -37,10 +37,12 @@ artifacts/
 tmp/
 *.log
 
+# Private sales and market-research notes
+docs/business/
+
 # Secrets and local infrastructure state
 *.pem
 *.key
 secrets/
 deploy/**/.terraform/
 deploy/**/terraform.tfstate*
-
