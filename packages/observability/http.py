@@ -33,6 +33,7 @@ def install_http_observability(app: FastAPI, service_name: str) -> None:
     """Attach request IDs, basic metrics, and the /metrics endpoint."""
 
     registry = CollectorRegistry()
+    app.state.metrics_registry = registry
     requests_total = Counter(
         "http_requests_total",
         "Total HTTP requests",
@@ -45,6 +46,9 @@ def install_http_observability(app: FastAPI, service_name: str) -> None:
         ("service", "method", "route"),
         registry=registry,
     )
+    app.state.quota_outcomes = Counter(
+        "quota_requests_total", "Quota enforcement outcomes", ("outcome",), registry=registry
+    )
 
     app.add_middleware(RequestIdMiddleware)
 
@@ -54,7 +58,15 @@ def install_http_observability(app: FastAPI, service_name: str) -> None:
         call_next: Callable[..., Awaitable[Response]],
     ) -> Response:
         started = time.perf_counter()
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception:
+            route_path = getattr(request.scope.get("route"), "path", "unmatched")
+            requests_total.labels(service_name, request.method, route_path, 500).inc()
+            request_duration.labels(service_name, request.method, route_path).observe(
+                time.perf_counter() - started
+            )
+            raise
         route = request.scope.get("route")
         route_path = getattr(route, "path", "unmatched")
         requests_total.labels(service_name, request.method, route_path, response.status_code).inc()
@@ -65,4 +77,7 @@ def install_http_observability(app: FastAPI, service_name: str) -> None:
 
     @app.get("/metrics", include_in_schema=False)
     async def metrics() -> PlainTextResponse:
+        refresh = getattr(app.state, "refresh_operational_metrics", None)
+        if refresh is not None:
+            await refresh()
         return PlainTextResponse(generate_latest(registry), media_type="text/plain; version=0.0.4")

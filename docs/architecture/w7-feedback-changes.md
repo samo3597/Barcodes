@@ -42,5 +42,5 @@ Cursor payload-ը պարունակում է schema version, tenant ID և վեր�
 
 - W7-ը feedback-ը միայն ընդունում է. reconcile/review workflow-ը MVP-ից դուրս է։
 - `include=data`-ն historical snapshot չի երաշխավորում. item-ի `version`-ը փոփոխության version-ն է, `data.version`-ը՝ current-ը։
-- Retention cleanup job-ը և full-resync runbook-ը W8 hardening-ի մաս են։
-- Cursor signing secret rotation-ը պահանջում է versioned key-ring կամ controlled client resync. MVP-ում live rotation չկա։
+- W8-ում ավելացված է dry-run-first prefix cleanup և durable cursor floor. [resync runbook](../runbooks/changes-resync.md)։
+- W8-ում optional previous signing key-ն աջակցում է controlled cursor rotation-ին. offline client grace period-ը պետք է հաստատել rollout-ից առաջ։

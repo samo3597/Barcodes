@@ -67,6 +67,7 @@ async def get_product(
         limit=principal.monthly_unique_product_limit,
     )
     if normalized not in allowed:
+        request.app.state.quota_outcomes.labels("monthly_denied").inc()
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail={
@@ -129,6 +130,8 @@ async def get_product_batch(
         )
         for barcode in payload.barcodes
     ]
+    if any(item.status == "quota_exceeded" for item in results):
+        request.app.state.quota_outcomes.labels("monthly_denied").inc()
     return ProductBatchResponse(
         results=results,
         usage=MonthlyProductUsage(

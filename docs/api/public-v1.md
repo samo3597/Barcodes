@@ -142,7 +142,10 @@ Feed-ը `change_id ASC` հերթով վերադարձնում է միայն այ
 
 ## Ընդհանուր validation
 
+- Public POST/PUT/PATCH body-ի սահմանը 1 MiB է. oversized request-ը `413 request_too_large` է։ Public API-ն compressed request body չի ընդունում (`415`)․ gzip-ը միայն ingest batch API-ի համար է։
 - Barcode-ը checksum-valid GTIN-8/12/13/14 է և string է մնում՝ leading zero-ները չկորցնելու համար։
 - `vat` և `is_weighted` դաշտերը միշտ JSON boolean են։
 - Error body-ն ներառում է machine-readable `code`, մարդու համար `message` և `retryable` նշում։
 - Monthly quota-ի default-ը 100 unique barcode է, daily request default-ը՝ 1,000։ Tenant plan-ը կարող է override անել երկուսն էլ։
+
+Retention cleanup-ից հետո resync-ի և cursor key rotation-ի գործնական ընթացակարգը՝ [changes resync runbook](../runbooks/changes-resync.md)։

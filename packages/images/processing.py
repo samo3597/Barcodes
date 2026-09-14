@@ -14,7 +14,7 @@ from PIL import Image, UnidentifiedImageError
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 MAX_IMAGE_PIXELS = 25_000_000
-MAX_REDIRECTS = 4
+MAX_REDIRECTS = 3
 MAX_DIMENSION = 2_048
 
 
@@ -75,6 +75,8 @@ def normalize_to_webp(raw: bytes) -> DownloadedImage:
     Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
     try:
         with Image.open(io.BytesIO(raw)) as source:
+            if source.format not in {"JPEG", "PNG", "WEBP"}:
+                raise ImagePolicyError("unsupported source image format")
             source.seek(0)
             if source.width * source.height > MAX_IMAGE_PIXELS:
                 raise ImagePolicyError("decoded image exceeds the pixel limit")

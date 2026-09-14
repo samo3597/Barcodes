@@ -161,6 +161,9 @@ async def apply_publication_event(
             for field, value in values.items():
                 setattr(current, field, value)
         await session.flush()
+        # Serialize ID allocation through commit so a cursor never skips a
+        # lower-ID publication that is still uncommitted on another connection.
+        await session.execute(text("SELECT pg_advisory_xact_lock(8172008)"))
         session.add(
             ChangeEvent(
                 event_id=event.event_id,

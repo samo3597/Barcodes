@@ -24,7 +24,7 @@ async def get_changes(
     request: Request,
     principal: ChangesReader,
     session: DatabaseSession,
-    cursor: str | None = None,
+    cursor: str | None = Query(default=None, max_length=512),
     limit: int | None = Query(default=None, ge=1),
     include: Literal["data"] | None = None,
 ) -> ChangesResponse:
@@ -47,10 +47,20 @@ async def get_changes(
             else 0
         )
     except InvalidCursorError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"code": "invalid_cursor", "message": str(error), "retryable": False},
-        ) from error
+        previous_secret = request.app.state.cursor_previous_signing_secret
+        try:
+            if not previous_secret or not cursor:
+                raise error
+            after_id = decode_change_cursor(cursor, principal.tenant_id, previous_secret)
+        except InvalidCursorError as previous_error:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "invalid_cursor",
+                    "message": str(previous_error),
+                    "retryable": False,
+                },
+            ) from previous_error
 
     retained_since = datetime.now(UTC) - timedelta(days=request.app.state.changes_retention_days)
     try:

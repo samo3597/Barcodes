@@ -135,3 +135,26 @@ Product-ի հաջող առաջին հարցումը ստեղծում է monthly 
 - `/health/ready` պատասխանում է՝ ծառայությունը պատրա՞ստ է իրական հարցումներ ընդունել, ներառյալ database կապը։
 
 Այս տարբերությունը deployment համակարգին թույլ է տալիս վերագործարկել մահացած պրոցեսը, բայց ժամանակավորապես traffic չուղարկել այն instance-ին, որի database-ը դեռ հասանելի չէ։
+
+## W8 operational tools
+
+W8-ի կառուցվածքը և դեռ բաց պայմանները՝ [hardening plan](architecture/w8-hardening.md)։ Backup/restore-ն ունի առանձին [runbook](runbooks/backup-restore.md)։
+
+Retention cleanup-ը սկսիր dry-run-ից՝
+
+```powershell
+docker compose run --rm public_api python scripts/prune_changes.py
+```
+
+`--apply`-ը ջնջում է միայն expired changes prefix-ը. այն մի օգտագործիր առանց backup-ի և dry-run թվերի ստուգման։ Feedback/usage history-ն մնում է։
+
+Load probe-ը պահանջում է նոր isolated `w8_load_*` DB՝ Server 2 migrations-ով, և Redis DB14։ Այն գործող catalog-ի վրա աշխատել չի կարող։ Նոր fixture DB-ի համար մեկ անգամ գործարկիր՝
+
+```sh
+DATABASE_URL=<isolated-w8-load-url> REDIS_URL=redis://redis_server2:6379/14 \
+  python scripts/load_probe.py --products 100000 --requests 200 --concurrency 4
+```
+
+Գործիքը իր test tenant key-ը log չի գրում և latency report է վերադարձնում։ Դա local ASGI չափում է. production target RPS-ը դեռ staging-ում պետք է ստուգվի։ Նույն fixture-ի վրա կրկին գործարկելու փոխարեն ստեղծիր նոր isolated DB։
+
+Retention integration test-ը global floor state ունի, ուստի պահանջում է առանձին migrations-ով `w8_test_*` DB և `TEST_HARDENING_DATABASE_URL`։ Այն չի գործարկվում գործող Server 2 DB-ի վրա։ Full regression-ի մյուս tests-ը օգտագործում են `TEST_DATABASE_URL` և `TEST_SERVER2_DATABASE_URL`։

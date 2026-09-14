@@ -31,6 +31,8 @@ def decode_change_cursor(cursor: str, tenant_id: UUID, secret: str) -> int:
         if not hmac.compare_digest(signature, expected):
             raise InvalidCursorError("cursor signature is invalid")
         value = json.loads(payload)
+        if not isinstance(value, dict):
+            raise InvalidCursorError("cursor payload must be an object")
         if (
             value.get("v") != 1
             or value.get("tenant_id") != str(tenant_id)
@@ -51,4 +53,4 @@ def _encode(value: bytes) -> str:
 
 
 def _decode(value: str) -> bytes:
-    return base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
+    return base64.b64decode(value + "=" * (-len(value) % 4), altchars=b"-_", validate=True)

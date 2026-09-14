@@ -1,0 +1,52 @@
+groups:
+  - name: barcodes
+    rules:
+      - alert: BarcodesPublicErrorRate
+        expr: sum(rate(http_requests_total{service="public-api",status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{service="public-api"}[5m])), 0.001) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Public API server errors exceed 1 percent
+      - alert: BarcodesPublicLatency
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service="public-api",route="/v1/products/{barcode}"}[5m]))) > 0.25
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Single product p95 exceeds 250 ms
+      - alert: BarcodesDeadLetter
+        expr: pipeline_records{kind="outbox",status="dead_letter"} > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Publication needs operator recovery
+      - alert: BarcodesPublicationLag
+        expr: outbox_oldest_pending_age_seconds > 60
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Undelivered publication is older than 60 seconds
+      - alert: BarcodesLimiterDegraded
+        expr: sum(increase(quota_requests_total{outcome=~"limiter_degraded|limiter_unavailable"}[5m])) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Redis request enforcement is degraded
+      - alert: BarcodesPipelineMetricsUnavailable
+        expr: pipeline_collection_success == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Pipeline database metrics cannot be collected
+      - alert: BarcodesBackupStale
+        expr: time() - barcodes_backup_last_success_timestamp_seconds > 86400
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: Last successful encrypted backup is older than 24 hours

@@ -6,6 +6,8 @@
 *.yaml text eol=lf
 Dockerfile text eol=lf
 *.md text eol=lf
+# Shell scripts must remain runnable after a Windows checkout.
+*.sh text eol=lf
 
 *.docx binary
 *.png binary

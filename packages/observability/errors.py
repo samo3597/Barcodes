@@ -67,7 +67,23 @@ def install_error_handlers(app: FastAPI) -> None:
             ErrorBody(
                 code="validation_error",
                 message="Request validation failed",
-                details={"errors": exc.errors()},
+                # Pydantic errors may contain a ValueError in ctx and raw input.
+                # Keep only JSON-safe diagnostic fields, never echo secret inputs.
+                details={
+                    "errors": [
+                        {key: error[key] for key in ("loc", "type", "msg")}
+                        for error in exc.errors()
+                    ]
+                },
                 retryable=False,
             ),
+        )
+
+    @app.exception_handler(Exception)
+    async def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+        return _response(
+            request,
+            500,
+            ErrorBody(code="internal_error", message="Unexpected server error", retryable=True),
+            headers={"X-Request-ID": _request_id(request)},
         )

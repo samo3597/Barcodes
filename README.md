@@ -54,7 +54,7 @@ docker compose up --build
 
 ## Կարգավիճակ
 
-W1–W7 աշխատանքային փաթեթները պատրաստ են։ Համակարգն այժմ ունի idempotent ingest, durable AI pipeline, immutable canonical versions, reliable Server 1 → Server 2 publication, tenant authentication, Redis-backed public product API, race-safe quota/usage accounting, append-only feedback և tenant-scoped cursor-based changes feed։ Հաջորդ փաթեթը W8 production hardening-ն է։
+W1–W7 աշխատանքային փաթեթները պատրաստ են։ W8 operational hardening-ը ընթացքի մեջ է՝ production configuration guards, failure/security tests, encrypted backup/restore rehearsal, retention cleanup, 100k local load probe և monitoring/runbooks։ Production rollout-ը դեռ փակված չէ․ single-read latency, իրական AI/storage/hosting և fault-injection բաց պայմանները նշված են [W8 փաստաթղթում](docs/architecture/w8-hardening.md)։
 
 ## Փաստաթղթեր
 
@@ -66,6 +66,8 @@ W1–W7 աշխատանքային փաթեթները պատրաստ են։ Համ
 - [W5 Server 2 read model](docs/architecture/w5-server2-read-model.md)
 - [W6 quota և usage](docs/architecture/w6-quota-usage.md)
 - [W7 feedback և changes](docs/architecture/w7-feedback-changes.md)
+- [W8 hardening և acceptance plan](docs/architecture/w8-hardening.md)
+- [W8 local validation արդյունքներ](docs/validation/w8-local.md)
 - [Տեխնիկական որոշումներ](docs/decisions/README.md)
 - [API contracts](docs/api/README.md)
 - [Source ingest API v1](docs/api/ingest-v1.md)
