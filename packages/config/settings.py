@@ -29,6 +29,10 @@ class ServiceSettings(BaseSettings):
     rate_limit_fail_open: bool = True
     internal_sync_secret: str | None = None
     internal_replay_window_seconds: int = Field(default=300, ge=30, le=3_600)
+    cursor_signing_secret: str = Field(default="dev-only-cursor-secret", min_length=16)
+    changes_default_limit: int = Field(default=100, ge=1, le=1_000)
+    changes_max_limit: int = Field(default=1_000, ge=1, le=10_000)
+    changes_retention_days: int = Field(default=365, ge=365)
 
     @field_validator("internal_sync_secret", mode="before")
     @classmethod

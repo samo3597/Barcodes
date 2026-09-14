@@ -116,10 +116,14 @@ services:
       DATABASE_URL: postgresql+asyncpg://barcodes:barcodes@postgres_server2:5432/barcodes_server2
       REDIS_URL: redis://redis_server2:6379/0
       INTERNAL_SYNC_SECRET: ${INTERNAL_SYNC_SECRET:-dev-only-change-me}
+      CURSOR_SIGNING_SECRET: ${CURSOR_SIGNING_SECRET:-dev-only-cursor-secret}
       PRODUCT_CACHE_TTL_SECONDS: 300
       DAILY_REQUEST_LIMIT: 1000
       MONTHLY_UNIQUE_PRODUCT_LIMIT: 100
       RATE_LIMIT_FAIL_OPEN: "true"
+      CHANGES_DEFAULT_LIMIT: 100
+      CHANGES_MAX_LIMIT: 1000
+      CHANGES_RETENTION_DAYS: 365
     ports:
       - "8002:8000"
     volumes:

@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from apps.public_api.routes.changes import router as changes_router
+from apps.public_api.routes.feedback import router as feedback_router
 from apps.public_api.routes.internal import router as internal_router
 from apps.public_api.routes.products import router as products_router
 from apps.public_api.routes.usage import router as usage_router
@@ -88,9 +90,15 @@ def create_app(
     app.state.default_monthly_unique_product_limit = active_settings.monthly_unique_product_limit
     app.state.internal_sync_secret = active_settings.internal_sync_secret
     app.state.internal_replay_window_seconds = active_settings.internal_replay_window_seconds
+    app.state.cursor_signing_secret = active_settings.cursor_signing_secret
+    app.state.changes_default_limit = active_settings.changes_default_limit
+    app.state.changes_max_limit = active_settings.changes_max_limit
+    app.state.changes_retention_days = active_settings.changes_retention_days
     app.include_router(internal_router)
     app.include_router(products_router)
     app.include_router(usage_router)
+    app.include_router(feedback_router)
+    app.include_router(changes_router)
 
     @app.get("/health/live", response_model=HealthResponse, tags=["health"])
     async def liveness() -> HealthResponse:

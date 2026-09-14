@@ -6,7 +6,7 @@ type: project
 status: active
 phase: 1
 created: 2026-08-25
-updated: 2026-09-01
+updated: 2026-09-02
 tags:
   - project
   - backend
@@ -21,7 +21,7 @@ tags:
 
 **Barcodes**-ը Data as a Service համակարգ է, որը տարբեր աղբյուրներից ընդունում է ապրանքային տվյալներ, պահպանում դրանց սկզբնական տարբերակներն ու պատմությունը, AI-ի միջոցով ձևավորում է միասնական կանոնական ապրանք և այն տրամադրում հաճախորդների 1C բազաներին արագ API-ով։
 
-**Ընթացիկ վիճակ․** W1–W6 փաթեթները պատրաստ են։ Առկա են idempotent ingest, durable AI pipeline, immutable canonical versions, non-blocking secure image processing, reliable Server 1 → Server 2 publication, tenant authentication, Redis-backed public product API և race-safe quota/usage accounting։ Հաջորդ քայլը W7 append-only feedback և cursor-based changes API-ն է։
+**Ընթացիկ վիճակ․** W1–W7 փաթեթները պատրաստ են։ Առկա են idempotent ingest, durable AI pipeline, immutable canonical versions, non-blocking secure image processing, reliable Server 1 → Server 2 publication, tenant authentication, Redis-backed public product API, race-safe quota/usage accounting, append-only feedback և tenant-scoped cursor-based changes feed։ Հաջորդ քայլը W8 production hardening-ն է։
 
 Առաջին փուլի տեխնիկական աղբյուրը՝ [[Barcodes/DaaS_Barcodes_Phase1_Technical_Spec_AM.docx|DaaS Barcodes Phase 1 տեխնիկական պահանջ]]։
 

@@ -10,7 +10,13 @@ from packages.domain.api_keys import generate_tenant_api_key
 from packages.persistence.database import build_engine, build_session_factory
 from packages.persistence.server2.models import Tenant, TenantApiKey
 
-DEFAULT_SCOPES = ["products:read", "categories:read", "usage:read"]
+DEFAULT_SCOPES = [
+    "products:read",
+    "categories:read",
+    "usage:read",
+    "feedback:write",
+    "changes:read",
+]
 
 
 async def create_tenant(code: str, name: str, scopes: list[str], database_url: str) -> str:
@@ -62,8 +68,14 @@ def parse_args() -> argparse.Namespace:
         "--scope",
         action="append",
         dest="scopes",
-        choices=["products:read", "categories:read", "usage:read"],
-        help="Repeat for each scope; defaults to product and category reads",
+        choices=[
+            "products:read",
+            "categories:read",
+            "usage:read",
+            "feedback:write",
+            "changes:read",
+        ],
+        help="Repeat for each scope; defaults to all tenant-facing API scopes",
     )
     return parser.parse_args()
 
