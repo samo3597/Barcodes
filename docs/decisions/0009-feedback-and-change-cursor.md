@@ -34,5 +34,5 @@ Feedback-ը պահել առանձին append-only `feedback_events` աղյուս
 1. [x] Ավելացնել feedback schema, validation և idempotent endpoint։
 2. [x] Ավելացնել signed cursor և tenant-scoped changes query։
 3. [x] Ավելացնել pagination, isolation, replay և retention integration tests։
-4. [ ] W8-ում ավելացնել retention cleanup ու full-resync runbook։
-5. [ ] W8-ում սահմանել cursor signing key rotation ընթացակարգը։
+4. [x] W8-ում ավելացնել retention cleanup ու full-resync runbook։
+5. [x] W8-ում սահմանել cursor signing key rotation ընթացակարգը և previous-key grace support։

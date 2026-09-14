@@ -1,5 +1,6 @@
 """Tenant bearer-key authentication and scope enforcement."""
 
+from asyncio import to_thread
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -61,8 +62,8 @@ async def authenticate_tenant(
     if resolved is None:
         raise _authentication_error()
     api_key, tenant = resolved
-    if api_key.status != "active" or not verify_tenant_api_key(
-        credentials.credentials, api_key.key_hash
+    if api_key.status != "active" or not await to_thread(
+        verify_tenant_api_key, credentials.credentials, api_key.key_hash
     ):
         raise _authentication_error()
     if tenant.status != "active":
@@ -113,6 +114,7 @@ def require_scope(scope: str) -> Callable[..., Awaitable[TenantPrincipal]]:
         try:
             result = await limiter.check(principal.tenant_id, principal.daily_request_limit)
         except RateLimiterUnavailable as error:
+            request.app.state.quota_outcomes.labels("limiter_unavailable").inc()
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={
@@ -121,6 +123,11 @@ def require_scope(scope: str) -> Callable[..., Awaitable[TenantPrincipal]]:
                     "retryable": True,
                 },
             ) from error
+        if result.degraded:
+            request.app.state.quota_outcomes.labels("limiter_degraded").inc()
+        request.app.state.quota_outcomes.labels(
+            "allowed" if result.allowed else "daily_denied"
+        ).inc()
         await record_daily_request(
             session,
             tenant_id=principal.tenant_id,

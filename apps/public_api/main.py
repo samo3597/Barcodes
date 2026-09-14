@@ -15,6 +15,7 @@ from apps.public_api.routes.usage import router as usage_router
 from packages.cache import ProductCache, RedisProductCache
 from packages.config import ServiceSettings
 from packages.contracts import HealthResponse
+from packages.observability.body import RequestBodyLimitMiddleware
 from packages.observability.errors import install_error_handlers
 from packages.observability.http import install_http_observability
 from packages.observability.logging import configure_logging
@@ -81,6 +82,7 @@ def create_app(
         version="0.1.0",
         lifespan=lifespan,
     )
+    app.add_middleware(RequestBodyLimitMiddleware)
     install_http_observability(app, active_settings.service_name)
     install_error_handlers(app)
     app.state.session_factory = session_factory
@@ -91,6 +93,7 @@ def create_app(
     app.state.internal_sync_secret = active_settings.internal_sync_secret
     app.state.internal_replay_window_seconds = active_settings.internal_replay_window_seconds
     app.state.cursor_signing_secret = active_settings.cursor_signing_secret
+    app.state.cursor_previous_signing_secret = active_settings.cursor_previous_signing_secret
     app.state.changes_default_limit = active_settings.changes_default_limit
     app.state.changes_max_limit = active_settings.changes_max_limit
     app.state.changes_retention_days = active_settings.changes_retention_days

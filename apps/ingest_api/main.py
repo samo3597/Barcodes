@@ -15,6 +15,7 @@ from packages.contracts import HealthResponse
 from packages.observability.errors import install_error_handlers
 from packages.observability.http import install_http_observability
 from packages.observability.logging import configure_logging
+from packages.observability.pipeline import install_pipeline_metrics
 from packages.persistence.database import build_engine, build_session_factory, check_database
 
 ReadinessCheck = Callable[[], Awaitable[None]]
@@ -64,6 +65,7 @@ def create_app(
         lifespan=lifespan,
     )
     install_http_observability(app, active_settings.service_name)
+    install_pipeline_metrics(app, session_factory)
     install_error_handlers(app)
     app.add_middleware(IngestBodyMiddleware)
     app.state.engine = engine

@@ -13,4 +13,9 @@ tmp
 *.pyc
 *.log
 .env
+.env.*
+!.env.example
+docs/business
+.qa*
+secrets
 

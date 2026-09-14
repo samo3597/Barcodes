@@ -39,5 +39,4 @@
 2. [x] Ավելացնել Redis limiter և configurable outage policy։
 3. [x] Ավելացնել single/batch quota enforcement և usage API։
 4. [x] Ավելացնել concurrency integration test։
-5. [ ] W8-ում ավելացնել quota denied/degraded metrics և alerts։
-
+5. [x] W8-ում ավելացնել quota denied/degraded metrics և alert rules. alert delivery-ն դեռ hosting gate է։

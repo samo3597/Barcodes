@@ -1,5 +1,6 @@
 """Source bearer-key authentication and scope enforcement."""
 
+from asyncio import to_thread
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -56,7 +57,8 @@ async def authenticate_source(
         raise _authentication_error()
 
     api_key, source = resolved
-    if api_key.status != "active" or not verify_source_api_key(
+    if api_key.status != "active" or not await to_thread(
+        verify_source_api_key,
         credentials.credentials,
         api_key.key_hash,
     ):

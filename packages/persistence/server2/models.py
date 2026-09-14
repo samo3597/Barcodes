@@ -138,6 +138,7 @@ class ChangeEvent(Server2Base):
     __table_args__ = (
         UniqueConstraint("barcode", "version", name="uq_change_events_barcode_version"),
         CheckConstraint("change_type IN ('upsert', 'disabled')", name="type_allowed"),
+        Index("ix_change_events_changed_at", "changed_at"),
     )
 
     change_id: Mapped[int] = mapped_column(BigInteger, Identity(always=False), primary_key=True)
@@ -178,7 +179,7 @@ class FeedbackEvent(Server2Base):
     operator_ref: Mapped[str | None] = mapped_column(String(255))
     fields: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
     client_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    request_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    request_id: Mapped[str] = mapped_column(String(128), nullable=False)
     received_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -196,6 +197,7 @@ class MonthlyProductUsage(Server2Base):
             name="uq_monthly_product_usage_tenant_month_barcode",
         ),
         Index("ix_monthly_product_usage_tenant_month", "tenant_id", "billing_month"),
+        Index("ix_monthly_product_usage_tenant_barcode", "tenant_id", "barcode"),
     )
 
     id: Mapped[UUID] = mapped_column(
@@ -232,3 +234,16 @@ class DailyUsageRollup(Server2Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
+
+
+class ChangeRetentionState(Server2Base):
+    """Durable cursor floor, including when cleanup removes the entire log."""
+
+    __tablename__ = "change_retention_state"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="singleton"),
+        CheckConstraint("expired_through >= 0", name="floor_nonnegative"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    expired_through: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)

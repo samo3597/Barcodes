@@ -12,7 +12,7 @@ from apps.public_api.main import create_app
 from packages.config import ServiceSettings
 from packages.contracts import PublicProduct
 from packages.domain.api_keys import generate_tenant_api_key
-from packages.domain.change_cursor import encode_change_cursor
+from packages.domain.change_cursor import decode_change_cursor, encode_change_cursor
 from packages.persistence.database import build_engine, build_session_factory
 from packages.persistence.server2.models import (
     AppliedEvent,
@@ -255,6 +255,21 @@ async def test_feedback_and_incremental_changes() -> None:
             )
             assert wrong_tenant.status_code == 400
             assert wrong_tenant.json()["error"]["code"] == "invalid_cursor"
+
+            app.state.cursor_previous_signing_secret = CURSOR_SECRET
+            app.state.cursor_signing_secret = "w8-rotated-cursor-secret"
+            rotated = await client.get(
+                "/v1/changes",
+                headers=headers,
+                params={"cursor": page_one.json()["next_cursor"]},
+            )
+            assert rotated.status_code == 200
+            assert (
+                decode_change_cursor(
+                    rotated.json()["next_cursor"], tenant_id, "w8-rotated-cursor-secret"
+                )
+                > 0
+            )
 
             expired = await client.get(
                 "/v1/changes",

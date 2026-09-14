@@ -27,6 +27,8 @@ class IngestBodyMiddleware:
         more_body = True
         while more_body:
             message = await receive()
+            if message["type"] == "http.disconnect":
+                return
             if message["type"] != "http.request":
                 continue
             compressed.extend(message.get("body", b""))

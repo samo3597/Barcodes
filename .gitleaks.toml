@@ -1,0 +1,12 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Two public test-only HMAC fixtures; never used by deployed services"
+condition = "AND"
+paths = [
+    '''^tests/integration/test_feedback_changes\.py$''',
+    '''^tests/integration/test_server2_api\.py$''',
+]
+regexTarget = "secret"
+regexes = ['''^w7-integration-cursor-secret$''', '''^w5-integration-secret$''']
