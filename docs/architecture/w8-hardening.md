@@ -61,6 +61,10 @@ Retention cleanup-ը ջնջում է միայն հին **ID prefix**-ը՝ մին
 
 Մանրամասն չափումները՝ [W8 local validation](../validation/w8-local.md)։
 
+## Git ինտեգրում — 2026-09-14
+
+W7-ը (`1261b69`), ապա W8-ը (`f18f6a1`) հերթականությամբ merge են արվել `main`-ի հետ և push արվել GitHub։ Merge-ից առաջ տեղական suite-ը՝ **89 passed**, Ruff և mypy՝ մաքուր։ [GitHub CI run 34841660262](https://github.com/samo3597/Barcodes/actions/runs/34841660262)՝ **success**, ներառյալ quality և secrets jobs-ը։ Սա հաստատում է ներկա կոդի ինտեգրումը, ոչ ստորև նշված դեռ չկատարված փորձերը։
+
 ## W8 ավարտելու բաց պայմաններ
 
 - [ ] Single-product p95 < 250 ms հաստատել staging-ում՝ ընտրված target RPS-ով։
@@ -71,4 +75,5 @@ Retention cleanup-ը ջնջում է միայն հին **ID prefix**-ը՝ մին
 - [ ] Image assets-ի backup/versioning և restore-ը փորձարկել։
 - [ ] Metrics scrape targets և alert delivery հաստատել. կանոնների ֆայլը ինքնուրույն alert չի ուղարկում։
 - [ ] Երկու API instance-ով network smoke/load և Server 1 stop փորձ կատարել։
-- [ ] GitHub CI-ն կանաչ տեսնել, review և W7→W8 հերթական merge կատարել։
+- [x] GitHub CI-ն կանաչ տեսնել և W7→W8 հերթական merge կատարել։
+- [ ] Առանձին pre-production code/security review կատարել։

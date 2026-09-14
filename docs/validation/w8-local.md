@@ -40,7 +40,7 @@ Database՝ նոր `w8_load_20260914`, Redis՝ test DB14։ Fixture՝ 100,000 chec
 - Ruff formatting/lint և mypy՝ մաքուր։
 - Alembic check՝ schema drift չկա։
 - Runtime HTTP smoke՝ non-root, read-only filesystem, `/tmp` tmpfs, capabilities dropped և no-new-privileges։ Liveness, OpenAPI feedback/changes paths և իրական DB readiness՝ անցած։
-- GitHub CI-ի remote արդյունքը առանձին պետք է ստուգել PR-ում. local checks-ը դրան փոխարինող չեն։
+- W7→W8 merge-ից հետո `main`-ի `f18f6a1` commit-ի [GitHub CI run 34841660262](https://github.com/samo3597/Barcodes/actions/runs/34841660262)՝ **success**։ Quality և secrets jobs-ը անցել են. CI-ն չի ներառում դեռ բաց staging/fault-injection փորձերը։
 - Prometheus `promtool check rules`՝ հաջող, 7 alert rule։
 - Working files-ի Gitleaks scan-ը նույնպես finding չունի։
 
